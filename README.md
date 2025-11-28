@@ -4,6 +4,7 @@
 
 **Zero-hallucination answers from NotebookLM — now with enterprise-grade security**
 
+[![npm](https://img.shields.io/npm/v/@pan-sec/notebooklm-mcp?color=blue)](https://www.npmjs.com/package/@pan-sec/notebooklm-mcp)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](https://www.typescriptlang.org/)
 [![MCP](https://img.shields.io/badge/MCP-2025-green.svg)](https://modelcontextprotocol.io/)
 [![Security](https://img.shields.io/badge/Security-14%20Layers-red.svg)](./SECURITY.md)
@@ -66,7 +67,7 @@ Even if one algorithm is broken, the other remains secure.
 
 ### Claude Code
 ```bash
-claude mcp add notebooklm npx notebooklm-mcp-secure@latest
+claude mcp add notebooklm -- npx @pan-sec/notebooklm-mcp@latest
 ```
 
 ### With Authentication (Recommended)
@@ -74,12 +75,12 @@ claude mcp add notebooklm npx notebooklm-mcp-secure@latest
 claude mcp add notebooklm \
   --env NLMCP_AUTH_ENABLED=true \
   --env NLMCP_AUTH_TOKEN=$(openssl rand -base64 32) \
-  npx notebooklm-mcp-secure@latest
+  -- npx @pan-sec/notebooklm-mcp@latest
 ```
 
 ### Codex
 ```bash
-codex mcp add notebooklm -- npx notebooklm-mcp-secure@latest
+codex mcp add notebooklm -- npx @pan-sec/notebooklm-mcp@latest
 ```
 
 <details>
@@ -91,7 +92,7 @@ Add to `~/.cursor/mcp.json`:
   "mcpServers": {
     "notebooklm": {
       "command": "npx",
-      "args": ["-y", "notebooklm-mcp-secure@latest"],
+      "args": ["-y", "@pan-sec/notebooklm-mcp@latest"],
       "env": {
         "NLMCP_AUTH_ENABLED": "true",
         "NLMCP_AUTH_TOKEN": "your-secure-token"
@@ -110,7 +111,7 @@ Add to `~/.cursor/mcp.json`:
   "mcpServers": {
     "notebooklm": {
       "command": "npx",
-      "args": ["notebooklm-mcp-secure@latest"],
+      "args": ["-y", "@pan-sec/notebooklm-mcp@latest"],
       "env": {
         "NLMCP_AUTH_ENABLED": "true",
         "NLMCP_AUTH_TOKEN": "your-secure-token"
@@ -201,7 +202,7 @@ Or integrate in CI/CD:
 
 ```yaml
 - name: Security Scan
-  run: npx notebooklm-mcp-secure && npm run security-scan
+  run: npx @pan-sec/notebooklm-mcp && npm run security-scan
 ```
 
 ---
