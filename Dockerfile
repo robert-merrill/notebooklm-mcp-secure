@@ -28,14 +28,18 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci --only=production
+# Install ALL dependencies (including dev for build)
+RUN npm ci
+
+# Copy source files
+COPY src/ ./src/
+COPY tsconfig.json ./
+
+# Build TypeScript
+RUN npm run build
 
 # Install browser
 RUN npx patchright install chromium
-
-# Copy built files
-COPY dist/ ./dist/
 
 # Create data directory
 RUN mkdir -p /app/data && chown -R node:node /app
