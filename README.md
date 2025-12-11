@@ -7,6 +7,7 @@
 [![npm](https://img.shields.io/npm/v/@pan-sec/notebooklm-mcp?color=blue)](https://www.npmjs.com/package/@pan-sec/notebooklm-mcp)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](https://www.typescriptlang.org/)
 [![MCP](https://img.shields.io/badge/MCP-2025-green.svg)](https://modelcontextprotocol.io/)
+[![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20macOS%20%7C%20Windows-lightgrey.svg)](#cross-platform-support)
 [![Security](https://img.shields.io/badge/Security-14%20Layers-red.svg)](./SECURITY.md)
 [![Post-Quantum](https://img.shields.io/badge/Encryption-Post--Quantum-purple.svg)](./SECURITY.md#post-quantum-encryption)
 [![Tests](https://img.shields.io/badge/Tests-111%20Passing-brightgreen.svg)](./tests/)
@@ -47,6 +48,7 @@ This fork adds **14 security hardening layers** to protect that data.
 | 🚦 | **Rate Limiting** | Per-session request throttling |
 | 🙈 | **Log Sanitization** | Credentials masked in all output |
 | 🐍 | **MEDUSA Integration** | Automated security scanning |
+| 🖥️ | **Cross-Platform** | Native support for Linux, macOS, Windows |
 
 ### Post-Quantum Ready
 
@@ -60,6 +62,18 @@ ML-KEM-768 (Kyber) + ChaCha20-Poly1305
 - **ChaCha20-Poly1305**: Modern stream cipher (immune to timing attacks)
 
 Even if one algorithm is broken, the other remains secure.
+
+### Cross-Platform Support
+
+Full native support for all major operating systems:
+
+| Platform | File Permissions | Data Directory |
+|----------|-----------------|----------------|
+| **Linux** | Unix chmod (0o600/0o700) | `~/.local/share/notebooklm-mcp/` |
+| **macOS** | Unix chmod (0o600/0o700) | `~/Library/Application Support/notebooklm-mcp/` |
+| **Windows** | ACLs via icacls (current user only) | `%LOCALAPPDATA%\notebooklm-mcp\` |
+
+All sensitive files (encryption keys, auth tokens, audit logs) are automatically protected with owner-only permissions on every platform.
 
 ---
 
@@ -251,6 +265,7 @@ All original functionality from [PleasePrompto/notebooklm-mcp](https://github.co
 | Zero-hallucination Q&A | ✅ | ✅ |
 | Library management | ✅ | ✅ |
 | Multi-client support | ✅ | ✅ |
+| **Cross-platform (Linux/macOS/Windows)** | ⚠️ | ✅ |
 | **Post-quantum encryption** | ❌ | ✅ |
 | **Secrets scanning** | ❌ | ✅ |
 | **Certificate pinning** | ❌ | ✅ |
