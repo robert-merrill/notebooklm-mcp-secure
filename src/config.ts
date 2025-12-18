@@ -214,6 +214,13 @@ function buildConfig(): Config {
 export const CONFIG: Config = buildConfig();
 
 /**
+ * Get configuration (alias for CONFIG, used by compliance modules)
+ */
+export function getConfig(): Config {
+  return CONFIG;
+}
+
+/**
  * Ensure all required directories exist
  * NOTE: We do NOT create configDir - it's not needed!
  */

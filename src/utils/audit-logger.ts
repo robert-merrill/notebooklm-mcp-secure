@@ -26,7 +26,16 @@ import {
 /**
  * Audit event types
  */
-export type AuditEventType = "tool" | "auth" | "session" | "security" | "system";
+export type AuditEventType =
+  | "tool"          // Tool invocations
+  | "auth"          // Authentication events
+  | "session"       // Session lifecycle
+  | "security"      // Security events
+  | "system"        // System events
+  | "compliance"    // Compliance events (GDPR, SOC2, CSSF)
+  | "data_access"   // Data access events (for DSAR)
+  | "configuration" // Configuration changes
+  | "retention";    // Data retention events
 
 /**
  * Security severity levels
@@ -89,6 +98,10 @@ export class AuditLogger {
     sessionEvents: 0,
     securityEvents: 0,
     systemEvents: 0,
+    complianceEvents: 0,
+    data_accessEvents: 0,
+    configurationEvents: 0,
+    retentionEvents: 0,
   };
 
   constructor(config?: Partial<AuditConfig>) {
@@ -345,6 +358,69 @@ export class AuditLogger {
     await this.log("system", eventName, true, details);
   }
 
+  /**
+   * Log a compliance event (GDPR, SOC2, CSSF)
+   */
+  async logComplianceEvent(
+    eventName: string,
+    category: string,
+    details: Record<string, unknown> = {}
+  ): Promise<void> {
+    await this.log("compliance", eventName, true, {
+      compliance_category: category,
+      ...details,
+    });
+  }
+
+  /**
+   * Log a data access event (for DSAR tracking)
+   */
+  async logDataAccessEvent(
+    action: "view" | "export" | "delete" | "request",
+    dataType: string,
+    details: Record<string, unknown> = {}
+  ): Promise<void> {
+    await this.log("data_access", `data_${action}`, true, {
+      data_type: dataType,
+      action,
+      ...details,
+    });
+  }
+
+  /**
+   * Log a configuration change event
+   */
+  async logConfigChange(
+    setting: string,
+    oldValue: unknown,
+    newValue: unknown,
+    changedBy: string = "system"
+  ): Promise<void> {
+    await this.log("configuration", "config_changed", true, {
+      setting,
+      old_value: typeof oldValue === "string" ? sanitizeForLogging(String(oldValue)) : "[complex]",
+      new_value: typeof newValue === "string" ? sanitizeForLogging(String(newValue)) : "[complex]",
+      changed_by: changedBy,
+    });
+  }
+
+  /**
+   * Log a data retention event
+   */
+  async logRetentionEvent(
+    action: "cleanup" | "archive" | "delete",
+    dataType: string,
+    count: number,
+    details: Record<string, unknown> = {}
+  ): Promise<void> {
+    await this.log("retention", `retention_${action}`, true, {
+      data_type: dataType,
+      items_affected: count,
+      action,
+      ...details,
+    });
+  }
+
   // ============================================================================
   // Helper Methods
   // ============================================================================
@@ -473,4 +549,17 @@ export const audit = {
 
   system: (event: string, details?: Record<string, unknown>) =>
     getAuditLogger().logSystemEvent(event, details),
+
+  // New compliance-related convenience functions
+  compliance: (event: string, category: string, details?: Record<string, unknown>) =>
+    getAuditLogger().logComplianceEvent(event, category, details),
+
+  dataAccess: (action: "view" | "export" | "delete" | "request", dataType: string, details?: Record<string, unknown>) =>
+    getAuditLogger().logDataAccessEvent(action, dataType, details),
+
+  configChange: (setting: string, oldValue: unknown, newValue: unknown, changedBy?: string) =>
+    getAuditLogger().logConfigChange(setting, oldValue, newValue, changedBy),
+
+  retention: (action: "cleanup" | "archive" | "delete", dataType: string, count: number, details?: Record<string, unknown>) =>
+    getAuditLogger().logRetentionEvent(action, dataType, count, details),
 };

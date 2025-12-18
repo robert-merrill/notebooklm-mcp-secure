@@ -1,0 +1,516 @@
+{
+  "timestamp": "2025-12-18T09:34:49.342032",
+  "medusa_version": "0.11.1",
+  "scan_summary": {
+    "total_issues": 12,
+    "files_scanned": 80,
+    "lines_scanned": 18681,
+    "security_score": 0,
+    "risk_level": "CRITICAL"
+  },
+  "severity_breakdown": {
+    "CRITICAL": 12,
+    "HIGH": 0,
+    "MEDIUM": 0,
+    "LOW": 0,
+    "UNDEFINED": 0
+  },
+  "findings": [
+    {
+      "scanner": "agentmemoryscanner",
+      "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/utils/secure-memory.ts",
+      "line": 109,
+      "severity": "CRITICAL",
+      "confidence": "HIGH",
+      "issue": "Secret/token found in memory config",
+      "cwe": null,
+      "code": null
+    },
+    {
+      "scanner": "agentmemoryscanner",
+      "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/utils/secure-memory.ts",
+      "line": 234,
+      "severity": "CRITICAL",
+      "confidence": "HIGH",
+      "issue": "Secret/token found in memory config",
+      "cwe": null,
+      "code": null
+    },
+    {
+      "scanner": "agentmemoryscanner",
+      "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+      "line": 61,
+      "severity": "CRITICAL",
+      "confidence": "HIGH",
+      "issue": "Secret/token found in memory config",
+      "cwe": null,
+      "code": null
+    },
+    {
+      "scanner": "agentmemoryscanner",
+      "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+      "line": 66,
+      "severity": "CRITICAL",
+      "confidence": "HIGH",
+      "issue": "Secret/token found in memory config",
+      "cwe": null,
+      "code": null
+    },
+    {
+      "scanner": "agentmemoryscanner",
+      "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+      "line": 71,
+      "severity": "CRITICAL",
+      "confidence": "HIGH",
+      "issue": "Secret/token found in memory config",
+      "cwe": null,
+      "code": null
+    },
+    {
+      "scanner": "agentmemoryscanner",
+      "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+      "line": 77,
+      "severity": "CRITICAL",
+      "confidence": "HIGH",
+      "issue": "Secret/token found in memory config",
+      "cwe": null,
+      "code": null
+    },
+    {
+      "scanner": "agentmemoryscanner",
+      "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+      "line": 85,
+      "severity": "CRITICAL",
+      "confidence": "HIGH",
+      "issue": "Secret/token found in memory config",
+      "cwe": null,
+      "code": null
+    },
+    {
+      "scanner": "agentmemoryscanner",
+      "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+      "line": 93,
+      "severity": "CRITICAL",
+      "confidence": "HIGH",
+      "issue": "Secret/token found in memory config",
+      "cwe": null,
+      "code": null
+    },
+    {
+      "scanner": "agentmemoryscanner",
+      "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+      "line": 158,
+      "severity": "CRITICAL",
+      "confidence": "HIGH",
+      "issue": "Password found in memory config",
+      "cwe": null,
+      "code": null
+    },
+    {
+      "scanner": "agentmemoryscanner",
+      "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+      "line": 176,
+      "severity": "CRITICAL",
+      "confidence": "HIGH",
+      "issue": "Secret/token found in memory config",
+      "cwe": null,
+      "code": null
+    },
+    {
+      "scanner": "agentmemoryscanner",
+      "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+      "line": 223,
+      "severity": "CRITICAL",
+      "confidence": "HIGH",
+      "issue": "Secret/token found in memory config",
+      "cwe": null,
+      "code": null
+    },
+    {
+      "scanner": "agentmemoryscanner",
+      "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+      "line": 227,
+      "severity": "CRITICAL",
+      "confidence": "HIGH",
+      "issue": "Secret/token found in memory config",
+      "cwe": null,
+      "code": null
+    }
+  ],
+  "aggregations": {
+    "by_severity": {
+      "CRITICAL": [
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/utils/secure-memory.ts",
+          "line": 109,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/utils/secure-memory.ts",
+          "line": 234,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 61,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 66,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 71,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 77,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 85,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 93,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 158,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Password found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 176,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 223,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 227,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        }
+      ]
+    },
+    "by_file": {
+      "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/utils/secure-memory.ts": [
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/utils/secure-memory.ts",
+          "line": 109,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/utils/secure-memory.ts",
+          "line": 234,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        }
+      ],
+      "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts": [
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 61,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 66,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 71,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 77,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 85,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 93,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 158,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Password found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 176,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 223,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 227,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        }
+      ]
+    },
+    "by_scanner": {
+      "agentmemoryscanner": [
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/utils/secure-memory.ts",
+          "line": 109,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/utils/secure-memory.ts",
+          "line": 234,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 61,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 66,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 71,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 77,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 85,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 93,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 158,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Password found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 176,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 223,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 227,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        }
+      ]
+    }
+  }
+}

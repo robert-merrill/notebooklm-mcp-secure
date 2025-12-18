@@ -10,9 +10,10 @@
 [![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20macOS%20%7C%20Windows-lightgrey.svg)](#cross-platform-support)
 [![Security](https://img.shields.io/badge/Security-14%20Layers-red.svg)](./SECURITY.md)
 [![Post-Quantum](https://img.shields.io/badge/Encryption-Post--Quantum-purple.svg)](./SECURITY.md#post-quantum-encryption)
+[![Compliance](https://img.shields.io/badge/Compliance-GDPR%20%7C%20SOC2%20%7C%20CSSF-blue.svg)](./docs/COMPLIANCE-SPEC.md)
 [![Tests](https://img.shields.io/badge/Tests-111%20Passing-brightgreen.svg)](./tests/)
 
-[Security Features](#security-features) • [Installation](#installation) • [Quick Start](#quick-start) • [Why This Fork?](#why-this-fork) • [Documentation](./SECURITY.md)
+[Security Features](#security-features) • [Compliance](#enterprise-compliance-v160) • [Installation](#installation) • [Quick Start](#quick-start) • [Why This Fork?](#why-this-fork) • [Documentation](./SECURITY.md)
 
 </div>
 
@@ -74,6 +75,43 @@ Full native support for all major operating systems:
 | **Windows** | ACLs via icacls (current user only) | `%LOCALAPPDATA%\notebooklm-mcp\` |
 
 All sensitive files (encryption keys, auth tokens, audit logs) are automatically protected with owner-only permissions on every platform.
+
+### Enterprise Compliance (v1.6.0+)
+
+Full compliance support for regulated industries:
+
+| Regulation | Features |
+|------------|----------|
+| **GDPR** | Consent management, DSAR handling, right to erasure, data portability |
+| **SOC2 Type II** | Hash-chained audit logs, incident response, availability monitoring |
+| **CSSF** | 7-year retention, SIEM integration, policy documentation |
+
+#### Compliance Tools (16 MCP tools)
+```
+compliance_dashboard    - Real-time compliance status
+compliance_report       - Generate audit reports (JSON/CSV/HTML)
+compliance_evidence     - Collect evidence packages
+grant_consent          - Record user consent
+submit_dsar            - Handle data subject requests
+request_erasure        - Right to be forgotten
+export_user_data       - Data portability export
+create_incident        - Security incident management
+...and 8 more
+```
+
+#### Compliance Dashboard Example
+```
+═══════════════════════════════════════════════════════════════
+  COMPLIANCE DASHBOARD - NotebookLM MCP Server
+═══════════════════════════════════════════════════════════════
+  Generated: 2025-12-18T10:00:00.000Z
+  Overall Score: 95/100
+
+  GDPR:  [COMPLIANT]     SOC2:  [COMPLIANT]     CSSF:  [COMPLIANT]
+═══════════════════════════════════════════════════════════════
+```
+
+See [COMPLIANCE-SPEC.md](./docs/COMPLIANCE-SPEC.md) for full documentation.
 
 ---
 

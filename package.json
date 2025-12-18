@@ -1,7 +1,7 @@
 {
   "name": "@pan-sec/notebooklm-mcp",
-  "version": "1.5.1",
-  "description": "Security-hardened MCP server for NotebookLM API with input validation, rate limiting, and log sanitization",
+  "version": "1.6.0",
+  "description": "Security-hardened MCP server for NotebookLM API with enterprise compliance (GDPR, SOC2, CSSF)",
   "type": "module",
   "bin": {
     "notebooklm-mcp": "dist/index.js"
@@ -24,7 +24,13 @@
     "ai",
     "claude",
     "security",
-    "hardened"
+    "hardened",
+    "gdpr",
+    "soc2",
+    "cssf",
+    "compliance",
+    "enterprise",
+    "audit-logging"
   ],
   "author": "Pantheon Security <support@pantheonsecurity.io> (https://pantheonsecurity.io)",
   "contributors": [
@@ -78,5 +84,25 @@
     "certificatePinning": true,
     "memoryScubbing": true,
     "medusaIntegration": true
+  },
+  "enterpriseCompliance": {
+    "gdpr": {
+      "consentManagement": true,
+      "dataSubjectRights": true,
+      "dataPortability": true,
+      "rightToErasure": true,
+      "privacyNotice": true
+    },
+    "soc2": {
+      "hashChainedAuditLogs": true,
+      "changeManagement": true,
+      "incidentResponse": true,
+      "availabilityMonitoring": true
+    },
+    "cssf": {
+      "sevenYearRetention": true,
+      "siemIntegration": true,
+      "policyDocumentation": true
+    }
   }
 }

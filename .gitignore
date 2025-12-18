@@ -32,6 +32,10 @@ Thumbs.db
 *.log
 npm-debug.log*
 screenshots/
+logs/
+
+# MEDUSA local environment
+medusa-env/
 
 # Archives / local notes
 *.tar.gz

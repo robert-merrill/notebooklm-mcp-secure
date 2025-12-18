@@ -1,0 +1,1256 @@
+{
+  "timestamp": "2025-11-28T07:55:36.353762",
+  "medusa_version": "0.11.1",
+  "scan_summary": {
+    "total_issues": 30,
+    "files_scanned": 50,
+    "lines_scanned": 9676,
+    "security_score": 0,
+    "risk_level": "CRITICAL"
+  },
+  "severity_breakdown": {
+    "CRITICAL": 12,
+    "HIGH": 0,
+    "MEDIUM": 17,
+    "LOW": 1,
+    "UNDEFINED": 0
+  },
+  "findings": [
+    {
+      "scanner": "yamlscanner",
+      "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/.medusa.yml",
+      "line": 5,
+      "severity": "LOW",
+      "confidence": "HIGH",
+      "issue": "missing document start \"---\"",
+      "cwe": null,
+      "code": null
+    },
+    {
+      "scanner": "yamlscanner",
+      "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/.medusa.yml",
+      "line": 51,
+      "severity": "MEDIUM",
+      "confidence": "HIGH",
+      "issue": "line too long (84 > 80 characters)",
+      "cwe": null,
+      "code": null
+    },
+    {
+      "scanner": "jsonscanner",
+      "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/package.json",
+      "line": null,
+      "severity": "MEDIUM",
+      "confidence": "HIGH",
+      "issue": "Potential sensitive data in key 'author': auth",
+      "cwe": null,
+      "code": null
+    },
+    {
+      "scanner": "mcpserverscanner",
+      "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/index.ts",
+      "line": 28,
+      "severity": "MEDIUM",
+      "confidence": "HIGH",
+      "issue": "Dynamic schema - time-based conditional behavior",
+      "cwe": null,
+      "code": null
+    },
+    {
+      "scanner": "mcpserverscanner",
+      "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/index.ts",
+      "line": 423,
+      "severity": "MEDIUM",
+      "confidence": "HIGH",
+      "issue": "Dynamic schema - time-based conditional behavior",
+      "cwe": null,
+      "code": null
+    },
+    {
+      "scanner": "mcpserverscanner",
+      "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/index.ts",
+      "line": 433,
+      "severity": "MEDIUM",
+      "confidence": "HIGH",
+      "issue": "Dynamic schema - time-based conditional behavior",
+      "cwe": null,
+      "code": null
+    },
+    {
+      "scanner": "mcpserverscanner",
+      "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/tools/definitions/ask-question.ts",
+      "line": 83,
+      "severity": "MEDIUM",
+      "confidence": "HIGH",
+      "issue": "Dynamic schema - time-based conditional behavior",
+      "cwe": null,
+      "code": null
+    },
+    {
+      "scanner": "mcpserverscanner",
+      "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/tools/definitions/ask-question.ts",
+      "line": 149,
+      "severity": "MEDIUM",
+      "confidence": "HIGH",
+      "issue": "Dynamic schema - time-based conditional behavior",
+      "cwe": null,
+      "code": null
+    },
+    {
+      "scanner": "mcpserverscanner",
+      "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/tools/definitions/ask-question.ts",
+      "line": 159,
+      "severity": "MEDIUM",
+      "confidence": "HIGH",
+      "issue": "Dynamic schema - time-based conditional behavior",
+      "cwe": null,
+      "code": null
+    },
+    {
+      "scanner": "mcpserverscanner",
+      "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/tools/definitions/ask-question.ts",
+      "line": 161,
+      "severity": "MEDIUM",
+      "confidence": "HIGH",
+      "issue": "Dynamic schema - time-based conditional behavior",
+      "cwe": null,
+      "code": null
+    },
+    {
+      "scanner": "mcpserverscanner",
+      "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/tools/definitions/system.ts",
+      "line": 22,
+      "severity": "MEDIUM",
+      "confidence": "HIGH",
+      "issue": "Dynamic schema - time-based conditional behavior",
+      "cwe": null,
+      "code": null
+    },
+    {
+      "scanner": "mcpserverscanner",
+      "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/tools/definitions/system.ts",
+      "line": 42,
+      "severity": "MEDIUM",
+      "confidence": "HIGH",
+      "issue": "Dynamic schema - time-based conditional behavior",
+      "cwe": null,
+      "code": null
+    },
+    {
+      "scanner": "mcpserverscanner",
+      "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/tools/definitions/system.ts",
+      "line": 52,
+      "severity": "MEDIUM",
+      "confidence": "HIGH",
+      "issue": "Dynamic schema - time-based conditional behavior",
+      "cwe": null,
+      "code": null
+    },
+    {
+      "scanner": "mcpserverscanner",
+      "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/tools/definitions/system.ts",
+      "line": 54,
+      "severity": "MEDIUM",
+      "confidence": "HIGH",
+      "issue": "Dynamic schema - time-based conditional behavior",
+      "cwe": null,
+      "code": null
+    },
+    {
+      "scanner": "mcpserverscanner",
+      "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/tools/definitions/system.ts",
+      "line": 66,
+      "severity": "MEDIUM",
+      "confidence": "HIGH",
+      "issue": "Dynamic schema - time-based conditional behavior",
+      "cwe": null,
+      "code": null
+    },
+    {
+      "scanner": "mcpserverscanner",
+      "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/tools/definitions/system.ts",
+      "line": 93,
+      "severity": "MEDIUM",
+      "confidence": "HIGH",
+      "issue": "Dynamic schema - time-based conditional behavior",
+      "cwe": null,
+      "code": null
+    },
+    {
+      "scanner": "mcpserverscanner",
+      "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/tools/definitions/system.ts",
+      "line": 103,
+      "severity": "MEDIUM",
+      "confidence": "HIGH",
+      "issue": "Dynamic schema - time-based conditional behavior",
+      "cwe": null,
+      "code": null
+    },
+    {
+      "scanner": "mcpserverscanner",
+      "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/tools/definitions/system.ts",
+      "line": 105,
+      "severity": "MEDIUM",
+      "confidence": "HIGH",
+      "issue": "Dynamic schema - time-based conditional behavior",
+      "cwe": null,
+      "code": null
+    },
+    {
+      "scanner": "agentmemoryscanner",
+      "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/utils/secure-memory.ts",
+      "line": 109,
+      "severity": "CRITICAL",
+      "confidence": "HIGH",
+      "issue": "Secret/token found in memory config",
+      "cwe": null,
+      "code": null
+    },
+    {
+      "scanner": "agentmemoryscanner",
+      "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/utils/secure-memory.ts",
+      "line": 234,
+      "severity": "CRITICAL",
+      "confidence": "HIGH",
+      "issue": "Secret/token found in memory config",
+      "cwe": null,
+      "code": null
+    },
+    {
+      "scanner": "agentmemoryscanner",
+      "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+      "line": 61,
+      "severity": "CRITICAL",
+      "confidence": "HIGH",
+      "issue": "Secret/token found in memory config",
+      "cwe": null,
+      "code": null
+    },
+    {
+      "scanner": "agentmemoryscanner",
+      "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+      "line": 66,
+      "severity": "CRITICAL",
+      "confidence": "HIGH",
+      "issue": "Secret/token found in memory config",
+      "cwe": null,
+      "code": null
+    },
+    {
+      "scanner": "agentmemoryscanner",
+      "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+      "line": 71,
+      "severity": "CRITICAL",
+      "confidence": "HIGH",
+      "issue": "Secret/token found in memory config",
+      "cwe": null,
+      "code": null
+    },
+    {
+      "scanner": "agentmemoryscanner",
+      "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+      "line": 77,
+      "severity": "CRITICAL",
+      "confidence": "HIGH",
+      "issue": "Secret/token found in memory config",
+      "cwe": null,
+      "code": null
+    },
+    {
+      "scanner": "agentmemoryscanner",
+      "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+      "line": 85,
+      "severity": "CRITICAL",
+      "confidence": "HIGH",
+      "issue": "Secret/token found in memory config",
+      "cwe": null,
+      "code": null
+    },
+    {
+      "scanner": "agentmemoryscanner",
+      "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+      "line": 93,
+      "severity": "CRITICAL",
+      "confidence": "HIGH",
+      "issue": "Secret/token found in memory config",
+      "cwe": null,
+      "code": null
+    },
+    {
+      "scanner": "agentmemoryscanner",
+      "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+      "line": 158,
+      "severity": "CRITICAL",
+      "confidence": "HIGH",
+      "issue": "Password found in memory config",
+      "cwe": null,
+      "code": null
+    },
+    {
+      "scanner": "agentmemoryscanner",
+      "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+      "line": 176,
+      "severity": "CRITICAL",
+      "confidence": "HIGH",
+      "issue": "Secret/token found in memory config",
+      "cwe": null,
+      "code": null
+    },
+    {
+      "scanner": "agentmemoryscanner",
+      "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+      "line": 223,
+      "severity": "CRITICAL",
+      "confidence": "HIGH",
+      "issue": "Secret/token found in memory config",
+      "cwe": null,
+      "code": null
+    },
+    {
+      "scanner": "agentmemoryscanner",
+      "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+      "line": 227,
+      "severity": "CRITICAL",
+      "confidence": "HIGH",
+      "issue": "Secret/token found in memory config",
+      "cwe": null,
+      "code": null
+    }
+  ],
+  "aggregations": {
+    "by_severity": {
+      "LOW": [
+        {
+          "scanner": "yamlscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/.medusa.yml",
+          "line": 5,
+          "severity": "LOW",
+          "confidence": "HIGH",
+          "issue": "missing document start \"---\"",
+          "cwe": null,
+          "code": null
+        }
+      ],
+      "MEDIUM": [
+        {
+          "scanner": "yamlscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/.medusa.yml",
+          "line": 51,
+          "severity": "MEDIUM",
+          "confidence": "HIGH",
+          "issue": "line too long (84 > 80 characters)",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "jsonscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/package.json",
+          "line": null,
+          "severity": "MEDIUM",
+          "confidence": "HIGH",
+          "issue": "Potential sensitive data in key 'author': auth",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "mcpserverscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/index.ts",
+          "line": 28,
+          "severity": "MEDIUM",
+          "confidence": "HIGH",
+          "issue": "Dynamic schema - time-based conditional behavior",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "mcpserverscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/index.ts",
+          "line": 423,
+          "severity": "MEDIUM",
+          "confidence": "HIGH",
+          "issue": "Dynamic schema - time-based conditional behavior",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "mcpserverscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/index.ts",
+          "line": 433,
+          "severity": "MEDIUM",
+          "confidence": "HIGH",
+          "issue": "Dynamic schema - time-based conditional behavior",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "mcpserverscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/tools/definitions/ask-question.ts",
+          "line": 83,
+          "severity": "MEDIUM",
+          "confidence": "HIGH",
+          "issue": "Dynamic schema - time-based conditional behavior",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "mcpserverscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/tools/definitions/ask-question.ts",
+          "line": 149,
+          "severity": "MEDIUM",
+          "confidence": "HIGH",
+          "issue": "Dynamic schema - time-based conditional behavior",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "mcpserverscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/tools/definitions/ask-question.ts",
+          "line": 159,
+          "severity": "MEDIUM",
+          "confidence": "HIGH",
+          "issue": "Dynamic schema - time-based conditional behavior",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "mcpserverscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/tools/definitions/ask-question.ts",
+          "line": 161,
+          "severity": "MEDIUM",
+          "confidence": "HIGH",
+          "issue": "Dynamic schema - time-based conditional behavior",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "mcpserverscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/tools/definitions/system.ts",
+          "line": 22,
+          "severity": "MEDIUM",
+          "confidence": "HIGH",
+          "issue": "Dynamic schema - time-based conditional behavior",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "mcpserverscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/tools/definitions/system.ts",
+          "line": 42,
+          "severity": "MEDIUM",
+          "confidence": "HIGH",
+          "issue": "Dynamic schema - time-based conditional behavior",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "mcpserverscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/tools/definitions/system.ts",
+          "line": 52,
+          "severity": "MEDIUM",
+          "confidence": "HIGH",
+          "issue": "Dynamic schema - time-based conditional behavior",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "mcpserverscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/tools/definitions/system.ts",
+          "line": 54,
+          "severity": "MEDIUM",
+          "confidence": "HIGH",
+          "issue": "Dynamic schema - time-based conditional behavior",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "mcpserverscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/tools/definitions/system.ts",
+          "line": 66,
+          "severity": "MEDIUM",
+          "confidence": "HIGH",
+          "issue": "Dynamic schema - time-based conditional behavior",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "mcpserverscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/tools/definitions/system.ts",
+          "line": 93,
+          "severity": "MEDIUM",
+          "confidence": "HIGH",
+          "issue": "Dynamic schema - time-based conditional behavior",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "mcpserverscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/tools/definitions/system.ts",
+          "line": 103,
+          "severity": "MEDIUM",
+          "confidence": "HIGH",
+          "issue": "Dynamic schema - time-based conditional behavior",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "mcpserverscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/tools/definitions/system.ts",
+          "line": 105,
+          "severity": "MEDIUM",
+          "confidence": "HIGH",
+          "issue": "Dynamic schema - time-based conditional behavior",
+          "cwe": null,
+          "code": null
+        }
+      ],
+      "CRITICAL": [
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/utils/secure-memory.ts",
+          "line": 109,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/utils/secure-memory.ts",
+          "line": 234,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 61,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 66,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 71,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 77,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 85,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 93,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 158,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Password found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 176,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 223,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 227,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        }
+      ]
+    },
+    "by_file": {
+      "/home/ross-churchill/Documents/notebooklm-mcp-secure/.medusa.yml": [
+        {
+          "scanner": "yamlscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/.medusa.yml",
+          "line": 5,
+          "severity": "LOW",
+          "confidence": "HIGH",
+          "issue": "missing document start \"---\"",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "yamlscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/.medusa.yml",
+          "line": 51,
+          "severity": "MEDIUM",
+          "confidence": "HIGH",
+          "issue": "line too long (84 > 80 characters)",
+          "cwe": null,
+          "code": null
+        }
+      ],
+      "/home/ross-churchill/Documents/notebooklm-mcp-secure/package.json": [
+        {
+          "scanner": "jsonscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/package.json",
+          "line": null,
+          "severity": "MEDIUM",
+          "confidence": "HIGH",
+          "issue": "Potential sensitive data in key 'author': auth",
+          "cwe": null,
+          "code": null
+        }
+      ],
+      "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/index.ts": [
+        {
+          "scanner": "mcpserverscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/index.ts",
+          "line": 28,
+          "severity": "MEDIUM",
+          "confidence": "HIGH",
+          "issue": "Dynamic schema - time-based conditional behavior",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "mcpserverscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/index.ts",
+          "line": 423,
+          "severity": "MEDIUM",
+          "confidence": "HIGH",
+          "issue": "Dynamic schema - time-based conditional behavior",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "mcpserverscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/index.ts",
+          "line": 433,
+          "severity": "MEDIUM",
+          "confidence": "HIGH",
+          "issue": "Dynamic schema - time-based conditional behavior",
+          "cwe": null,
+          "code": null
+        }
+      ],
+      "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/tools/definitions/ask-question.ts": [
+        {
+          "scanner": "mcpserverscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/tools/definitions/ask-question.ts",
+          "line": 83,
+          "severity": "MEDIUM",
+          "confidence": "HIGH",
+          "issue": "Dynamic schema - time-based conditional behavior",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "mcpserverscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/tools/definitions/ask-question.ts",
+          "line": 149,
+          "severity": "MEDIUM",
+          "confidence": "HIGH",
+          "issue": "Dynamic schema - time-based conditional behavior",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "mcpserverscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/tools/definitions/ask-question.ts",
+          "line": 159,
+          "severity": "MEDIUM",
+          "confidence": "HIGH",
+          "issue": "Dynamic schema - time-based conditional behavior",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "mcpserverscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/tools/definitions/ask-question.ts",
+          "line": 161,
+          "severity": "MEDIUM",
+          "confidence": "HIGH",
+          "issue": "Dynamic schema - time-based conditional behavior",
+          "cwe": null,
+          "code": null
+        }
+      ],
+      "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/tools/definitions/system.ts": [
+        {
+          "scanner": "mcpserverscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/tools/definitions/system.ts",
+          "line": 22,
+          "severity": "MEDIUM",
+          "confidence": "HIGH",
+          "issue": "Dynamic schema - time-based conditional behavior",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "mcpserverscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/tools/definitions/system.ts",
+          "line": 42,
+          "severity": "MEDIUM",
+          "confidence": "HIGH",
+          "issue": "Dynamic schema - time-based conditional behavior",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "mcpserverscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/tools/definitions/system.ts",
+          "line": 52,
+          "severity": "MEDIUM",
+          "confidence": "HIGH",
+          "issue": "Dynamic schema - time-based conditional behavior",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "mcpserverscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/tools/definitions/system.ts",
+          "line": 54,
+          "severity": "MEDIUM",
+          "confidence": "HIGH",
+          "issue": "Dynamic schema - time-based conditional behavior",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "mcpserverscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/tools/definitions/system.ts",
+          "line": 66,
+          "severity": "MEDIUM",
+          "confidence": "HIGH",
+          "issue": "Dynamic schema - time-based conditional behavior",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "mcpserverscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/tools/definitions/system.ts",
+          "line": 93,
+          "severity": "MEDIUM",
+          "confidence": "HIGH",
+          "issue": "Dynamic schema - time-based conditional behavior",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "mcpserverscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/tools/definitions/system.ts",
+          "line": 103,
+          "severity": "MEDIUM",
+          "confidence": "HIGH",
+          "issue": "Dynamic schema - time-based conditional behavior",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "mcpserverscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/tools/definitions/system.ts",
+          "line": 105,
+          "severity": "MEDIUM",
+          "confidence": "HIGH",
+          "issue": "Dynamic schema - time-based conditional behavior",
+          "cwe": null,
+          "code": null
+        }
+      ],
+      "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/utils/secure-memory.ts": [
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/utils/secure-memory.ts",
+          "line": 109,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/utils/secure-memory.ts",
+          "line": 234,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        }
+      ],
+      "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts": [
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 61,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 66,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 71,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 77,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 85,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 93,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 158,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Password found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 176,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 223,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 227,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        }
+      ]
+    },
+    "by_scanner": {
+      "yamlscanner": [
+        {
+          "scanner": "yamlscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/.medusa.yml",
+          "line": 5,
+          "severity": "LOW",
+          "confidence": "HIGH",
+          "issue": "missing document start \"---\"",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "yamlscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/.medusa.yml",
+          "line": 51,
+          "severity": "MEDIUM",
+          "confidence": "HIGH",
+          "issue": "line too long (84 > 80 characters)",
+          "cwe": null,
+          "code": null
+        }
+      ],
+      "jsonscanner": [
+        {
+          "scanner": "jsonscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/package.json",
+          "line": null,
+          "severity": "MEDIUM",
+          "confidence": "HIGH",
+          "issue": "Potential sensitive data in key 'author': auth",
+          "cwe": null,
+          "code": null
+        }
+      ],
+      "mcpserverscanner": [
+        {
+          "scanner": "mcpserverscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/index.ts",
+          "line": 28,
+          "severity": "MEDIUM",
+          "confidence": "HIGH",
+          "issue": "Dynamic schema - time-based conditional behavior",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "mcpserverscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/index.ts",
+          "line": 423,
+          "severity": "MEDIUM",
+          "confidence": "HIGH",
+          "issue": "Dynamic schema - time-based conditional behavior",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "mcpserverscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/index.ts",
+          "line": 433,
+          "severity": "MEDIUM",
+          "confidence": "HIGH",
+          "issue": "Dynamic schema - time-based conditional behavior",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "mcpserverscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/tools/definitions/ask-question.ts",
+          "line": 83,
+          "severity": "MEDIUM",
+          "confidence": "HIGH",
+          "issue": "Dynamic schema - time-based conditional behavior",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "mcpserverscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/tools/definitions/ask-question.ts",
+          "line": 149,
+          "severity": "MEDIUM",
+          "confidence": "HIGH",
+          "issue": "Dynamic schema - time-based conditional behavior",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "mcpserverscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/tools/definitions/ask-question.ts",
+          "line": 159,
+          "severity": "MEDIUM",
+          "confidence": "HIGH",
+          "issue": "Dynamic schema - time-based conditional behavior",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "mcpserverscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/tools/definitions/ask-question.ts",
+          "line": 161,
+          "severity": "MEDIUM",
+          "confidence": "HIGH",
+          "issue": "Dynamic schema - time-based conditional behavior",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "mcpserverscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/tools/definitions/system.ts",
+          "line": 22,
+          "severity": "MEDIUM",
+          "confidence": "HIGH",
+          "issue": "Dynamic schema - time-based conditional behavior",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "mcpserverscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/tools/definitions/system.ts",
+          "line": 42,
+          "severity": "MEDIUM",
+          "confidence": "HIGH",
+          "issue": "Dynamic schema - time-based conditional behavior",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "mcpserverscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/tools/definitions/system.ts",
+          "line": 52,
+          "severity": "MEDIUM",
+          "confidence": "HIGH",
+          "issue": "Dynamic schema - time-based conditional behavior",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "mcpserverscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/tools/definitions/system.ts",
+          "line": 54,
+          "severity": "MEDIUM",
+          "confidence": "HIGH",
+          "issue": "Dynamic schema - time-based conditional behavior",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "mcpserverscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/tools/definitions/system.ts",
+          "line": 66,
+          "severity": "MEDIUM",
+          "confidence": "HIGH",
+          "issue": "Dynamic schema - time-based conditional behavior",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "mcpserverscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/tools/definitions/system.ts",
+          "line": 93,
+          "severity": "MEDIUM",
+          "confidence": "HIGH",
+          "issue": "Dynamic schema - time-based conditional behavior",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "mcpserverscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/tools/definitions/system.ts",
+          "line": 103,
+          "severity": "MEDIUM",
+          "confidence": "HIGH",
+          "issue": "Dynamic schema - time-based conditional behavior",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "mcpserverscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/tools/definitions/system.ts",
+          "line": 105,
+          "severity": "MEDIUM",
+          "confidence": "HIGH",
+          "issue": "Dynamic schema - time-based conditional behavior",
+          "cwe": null,
+          "code": null
+        }
+      ],
+      "agentmemoryscanner": [
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/utils/secure-memory.ts",
+          "line": 109,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/src/utils/secure-memory.ts",
+          "line": 234,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 61,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 66,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 71,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 77,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 85,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 93,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 158,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Password found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 176,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 223,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        },
+        {
+          "scanner": "agentmemoryscanner",
+          "file": "/home/ross-churchill/Documents/notebooklm-mcp-secure/tests/secure-memory.test.ts",
+          "line": 227,
+          "severity": "CRITICAL",
+          "confidence": "HIGH",
+          "issue": "Secret/token found in memory config",
+          "cwe": null,
+          "code": null
+        }
+      ]
+    }
+  }
+}

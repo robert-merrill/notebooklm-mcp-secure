@@ -5,6 +5,92 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2025-12-18
+
+### Added - Enterprise Compliance Module
+
+Major release adding comprehensive enterprise compliance support for GDPR, SOC2 Type II, and CSSF (Luxembourg) regulations.
+
+#### Core Compliance Infrastructure (Phase 1)
+- **Compliance Logger** - Hash-chained audit logs with SHA-256 integrity verification
+  - Tamper-evident logging with cryptographic chain
+  - 7-year retention support (CSSF requirement)
+  - Structured compliance events with actor tracking
+- **Data Classifier** - Automatic data sensitivity classification
+  - 5 classification levels: PUBLIC, INTERNAL, CONFIDENTIAL, RESTRICTED, REGULATED
+  - Pattern-based detection for PII, credentials, financial data
+- **Data Inventory** - GDPR Article 30 Records of Processing Activities
+  - Automatic discovery and cataloging of all data stores
+  - Processing purpose and legal basis tracking
+- **Consent Manager** - User consent tracking and management
+  - GDPR Article 6 legal basis support
+  - Consent versioning and expiration handling
+
+#### Data Subject Rights - GDPR (Phase 2)
+- **DSAR Handler** - Data Subject Access Request processing (Article 15)
+  - Automated data collection and response generation
+  - 30-day deadline tracking
+- **Data Erasure Manager** - Right to be forgotten (Article 17)
+  - Verified secure deletion with audit trail
+  - Scope-based erasure (categories, date ranges)
+- **Data Exporter** - Data portability (Article 20)
+  - Machine-readable JSON export format
+  - Checksum verification for integrity
+- **Retention Engine** - Automatic data retention enforcement
+  - Configurable policies per data type
+  - CSSF 7-year retention for audit logs
+
+#### Security Monitoring & Incident Response (Phase 3)
+- **Incident Manager** - Security incident lifecycle management
+  - Severity-based workflow (low/medium/high/critical)
+  - 72-hour notification deadline tracking (GDPR breach notification)
+  - Root cause analysis and remediation tracking
+- **Alert Manager** - Multi-channel security alerting
+  - Console, file, webhook, and email channels
+  - Severity-based routing and rate limiting
+- **Breach Detector** - Pattern-based breach detection
+  - Configurable detection rules
+  - Automatic incident creation and alerting
+- **Health Monitor** - System availability monitoring (SOC2)
+  - Component health checks
+  - Uptime tracking and SLA reporting
+- **SIEM Exporter** - Enterprise SIEM integration
+  - CEF (ArcSight), LEEF (QRadar), Syslog, Splunk HEC formats
+  - Real-time event streaming
+
+#### Compliance Reporting & Documentation (Phase 4)
+- **Report Generator** - Compliance report generation
+  - 10 report types: compliance_summary, gdpr_audit, soc2_audit, cssf_audit, security_audit, incident_report, dsar_report, retention_report, change_management, full_audit
+  - JSON, CSV, HTML output formats
+- **Evidence Collector** - Audit evidence packages
+  - Verifiable evidence with SHA-256 checksums
+  - Regulation-specific collection (GDPR, SOC2, CSSF)
+- **Compliance Dashboard** - Real-time compliance status
+  - Per-regulation status (compliant/at_risk/non_compliant)
+  - Compliance score calculation (0-100)
+  - CLI-formatted dashboard output
+- **Change Log** - Configuration change tracking (SOC2)
+  - Before/after value tracking
+  - Impact assessment (low/medium/high/critical)
+  - Approval workflow support
+- **Policy Doc Manager** - Policy documentation management
+  - 6 policy types: privacy, retention, access control, encryption, incident response, acceptable use
+  - Version control and review scheduling
+- **16 MCP Compliance Tools** - Claude integration
+  - Full compliance functionality exposed via MCP tools
+  - Real-time compliance status queries
+
+### Technical Details
+- **23 new TypeScript modules** in `src/compliance/`
+- **13,147 lines of code** for compliance functionality
+- **All modules use singleton pattern** for consistent state management
+- **Full type safety** with comprehensive TypeScript interfaces
+- **Zero external dependencies** for compliance code
+
+### Documentation
+- Added `docs/COMPLIANCE-SPEC.md` - Full 4-phase implementation specification
+- Added MEDUSA scan response documenting false positive analysis
+
 ## [1.2.0] - 2025-11-21
 
 ### Added
