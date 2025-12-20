@@ -2,7 +2,7 @@
 
 # NotebookLM MCP Server (Security Hardened)
 
-**Zero-hallucination answers from NotebookLM — now with enterprise-grade security**
+**Zero-hallucination answers from NotebookLM + Gemini Deep Research — with enterprise-grade security**
 
 [![npm](https://img.shields.io/npm/v/@pan-sec/notebooklm-mcp?color=blue)](https://www.npmjs.com/package/@pan-sec/notebooklm-mcp)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](https://www.typescriptlang.org/)
@@ -10,15 +10,121 @@
 [![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20macOS%20%7C%20Windows-lightgrey.svg)](#cross-platform-support)
 [![Security](https://img.shields.io/badge/Security-14%20Layers-red.svg)](./SECURITY.md)
 [![Post-Quantum](https://img.shields.io/badge/Encryption-Post--Quantum-purple.svg)](./SECURITY.md#post-quantum-encryption)
+[![Gemini](https://img.shields.io/badge/Gemini-Deep%20Research-4285F4.svg)](#-gemini-deep-research-v180)
 [![Compliance](https://img.shields.io/badge/Compliance-GDPR%20%7C%20SOC2%20%7C%20CSSF-blue.svg)](./docs/COMPLIANCE-SPEC.md)
 [![Tests](https://img.shields.io/badge/Tests-111%20Passing-brightgreen.svg)](./tests/)
 
-[Security Features](#security-features) • [Compliance](#enterprise-compliance-v160) • [Installation](#installation) • [Quick Start](#quick-start) • [Why This Fork?](#why-this-fork) • [Documentation](./SECURITY.md)
+[**NEW: Gemini Deep Research**](#-gemini-deep-research-v180) • [Security Features](#security-features) • [Compliance](#enterprise-compliance-v160) • [Installation](#installation) • [Quick Start](#quick-start)
 
 </div>
 
-> 🔒 **Security-hardened fork** of [PleasePrompto/notebooklm-mcp](https://github.com/PleasePrompto/notebooklm-mcp)
+> **Security-hardened fork** of [PleasePrompto/notebooklm-mcp](https://github.com/PleasePrompto/notebooklm-mcp)
 > Maintained by [Pantheon Security](https://pantheonsecurity.io)
+
+---
+
+## Gemini Deep Research (v1.8.0)
+
+**The most powerful research capability for AI agents — now in your MCP toolkit.**
+
+v1.8.0 introduces the **Gemini Interactions API** as a stable, API-based research backend alongside browser automation. This gives your agents access to Google's state-of-the-art Deep Research agent.
+
+### Why This Matters
+
+| Challenge | Solution |
+|-----------|----------|
+| Browser UI changes break automation | **Gemini API is stable and versioned** |
+| Need comprehensive research but no research agent | **Deep Research agent does it for you** |
+| Want current information with citations | **Google Search grounding built-in** |
+| Need reliable, fast queries | **API-based = no UI dependencies** |
+
+### New Tools
+
+#### `deep_research` — Comprehensive Research Agent
+
+```
+"Research the security implications of post-quantum cryptography adoption in financial services"
+```
+
+- Runs Google's **Deep Research agent** (same as Gemini Advanced)
+- Takes 1-5 minutes for comprehensive, web-grounded analysis
+- Returns structured answers with **citations and sources**
+- Perfect for complex topics requiring multi-source synthesis
+
+#### `gemini_query` — Fast Grounded Queries
+
+```
+"What are the latest CVEs for Log4j in 2025?" (with Google Search)
+"Calculate the compound interest on $10,000 at 5% over 10 years" (with code execution)
+"Summarize this security advisory: [URL]" (with URL context)
+```
+
+- **Google Search grounding** — Current information, not just training data
+- **Code execution** — Run calculations, data analysis
+- **URL context** — Analyze web pages on demand
+- Models: `gemini-2.5-flash` (fast), `gemini-2.5-pro` (powerful), `gemini-3-flash-preview` (latest)
+
+#### `get_research_status` — Background Task Monitoring
+
+Run deep research in the background and check progress:
+```
+"Start researching [topic] in the background"
+... continue other work ...
+"Check research status for interaction_abc123"
+```
+
+### Hybrid Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                        NotebookLM MCP Server v1.8.0                     │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  ┌─────────────────────────┐       ┌─────────────────────────────────┐  │
+│  │   BROWSER AUTOMATION    │       │        GEMINI API               │  │
+│  │   (Your Documents)      │       │        (Web Research)           │  │
+│  ├─────────────────────────┤       ├─────────────────────────────────┤  │
+│  │                         │       │                                 │  │
+│  │  • ask_question         │       │  • deep_research          NEW   │  │
+│  │  • add_notebook         │       │  • gemini_query           NEW   │  │
+│  │  • list_notebooks       │       │  • get_research_status    NEW   │  │
+│  │  • manage_sources       │       │                                 │  │
+│  │  • generate_audio       │       │  Powered by:                    │  │
+│  │                         │       │  • Deep Research Agent          │  │
+│  │  Grounded on:           │       │  • Google Search                │  │
+│  │  YOUR uploaded docs     │       │  • Code Execution               │  │
+│  │                         │       │  • URL Analysis                 │  │
+│  └─────────────────────────┘       └─────────────────────────────────┘  │
+│                                                                         │
+│                    ┌───────────────────────────────┐                    │
+│                    │     14 SECURITY LAYERS        │                    │
+│                    │  Post-Quantum • Audit Logs    │                    │
+│                    │  Cert Pinning • Memory Wipe   │                    │
+│                    └───────────────────────────────┘                    │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+### Gemini Configuration
+
+```bash
+# Required for Gemini features
+GEMINI_API_KEY=your-api-key          # Get from https://aistudio.google.com/apikey
+
+# Optional settings
+GEMINI_DEFAULT_MODEL=gemini-2.5-flash    # Default model
+GEMINI_DEEP_RESEARCH_ENABLED=true        # Enable Deep Research
+GEMINI_TIMEOUT_MS=30000                  # API timeout
+```
+
+### When to Use Which
+
+| Task | Best Tool | Why |
+|------|-----------|-----|
+| Questions about YOUR documents | `ask_question` | Grounded on your uploaded sources |
+| Comprehensive topic research | `deep_research` | Multi-source synthesis with citations |
+| Current events / recent info | `gemini_query` + google_search | Live web data |
+| Code calculations | `gemini_query` + code_execution | Reliable computation |
+| Analyze a webpage | `gemini_query` + url_context | Direct page analysis |
 
 ---
 
@@ -99,18 +205,6 @@ create_incident        - Security incident management
 ...and 8 more
 ```
 
-#### Compliance Dashboard Example
-```
-═══════════════════════════════════════════════════════════════
-  COMPLIANCE DASHBOARD - NotebookLM MCP Server
-═══════════════════════════════════════════════════════════════
-  Generated: 2025-12-18T10:00:00.000Z
-  Overall Score: 95/100
-
-  GDPR:  [COMPLIANT]     SOC2:  [COMPLIANT]     CSSF:  [COMPLIANT]
-═══════════════════════════════════════════════════════════════
-```
-
 See [COMPLIANCE-SPEC.md](./docs/COMPLIANCE-SPEC.md) for full documentation.
 
 ---
@@ -122,11 +216,12 @@ See [COMPLIANCE-SPEC.md](./docs/COMPLIANCE-SPEC.md) for full documentation.
 claude mcp add notebooklm -- npx @pan-sec/notebooklm-mcp@latest
 ```
 
-### With Authentication (Recommended)
+### With Authentication + Gemini (Recommended)
 ```bash
 claude mcp add notebooklm \
   --env NLMCP_AUTH_ENABLED=true \
   --env NLMCP_AUTH_TOKEN=$(openssl rand -base64 32) \
+  --env GEMINI_API_KEY=your-gemini-api-key \
   -- npx @pan-sec/notebooklm-mcp@latest
 ```
 
@@ -147,7 +242,8 @@ Add to `~/.cursor/mcp.json`:
       "args": ["-y", "@pan-sec/notebooklm-mcp@latest"],
       "env": {
         "NLMCP_AUTH_ENABLED": "true",
-        "NLMCP_AUTH_TOKEN": "your-secure-token"
+        "NLMCP_AUTH_TOKEN": "your-secure-token",
+        "GEMINI_API_KEY": "your-gemini-api-key"
       }
     }
   }
@@ -166,7 +262,8 @@ Add to `~/.cursor/mcp.json`:
       "args": ["-y", "@pan-sec/notebooklm-mcp@latest"],
       "env": {
         "NLMCP_AUTH_ENABLED": "true",
-        "NLMCP_AUTH_TOKEN": "your-secure-token"
+        "NLMCP_AUTH_TOKEN": "your-secure-token",
+        "GEMINI_API_KEY": "your-gemini-api-key"
       }
     }
   }
@@ -194,6 +291,56 @@ Go to [notebooklm.google.com](https://notebooklm.google.com) → Create notebook
 "Research [topic] using this NotebookLM: [link]"
 ```
 
+### 5. Try Deep Research (NEW!)
+```
+"Use deep research to investigate [complex topic]"
+```
+
+---
+
+## Complete Tool Reference
+
+### Research Tools
+| Tool | Description | Backend |
+|------|-------------|---------|
+| `ask_question` | Query your NotebookLM notebooks | Browser |
+| `deep_research` | Comprehensive research with citations | Gemini API |
+| `gemini_query` | Fast queries with grounding tools | Gemini API |
+| `get_research_status` | Check background research progress | Gemini API |
+
+### Notebook Management
+| Tool | Description |
+|------|-------------|
+| `add_notebook` | Add notebook to library |
+| `list_notebooks` | List all notebooks |
+| `get_notebook` | Get notebook details |
+| `update_notebook` | Update notebook metadata |
+| `remove_notebook` | Remove from library |
+| `select_notebook` | Set active notebook |
+| `search_notebooks` | Search by query |
+
+### Source Management (v1.7.0+)
+| Tool | Description |
+|------|-------------|
+| `manage_sources` | Add/remove/list sources |
+| `generate_audio` | Create Audio Overview |
+| `sync_notebook` | Sync sources from local files |
+
+### Session & System
+| Tool | Description |
+|------|-------------|
+| `list_sessions` | View active sessions |
+| `close_session` | Close a session |
+| `reset_session` | Reset session chat |
+| `get_health` | Server health check |
+| `setup_auth` | Initial authentication |
+| `re_auth` | Re-authenticate |
+| `cleanup_data` | Deep cleanup utility |
+| `get_library_stats` | Library statistics |
+
+### Compliance (v1.6.0+)
+16 compliance tools for GDPR, SOC2, and CSSF requirements.
+
 ---
 
 ## What Gets Protected
@@ -206,6 +353,7 @@ Go to [notebooklm.google.com](https://notebooklm.google.com) → Create notebook
 | Google connection | Certificate pinned (MITM blocked) |
 | Log output | Credentials auto-redacted |
 | API responses | Scanned for leaked secrets |
+| Gemini API key | Secure memory handling |
 
 ---
 
@@ -217,6 +365,12 @@ All security features are **enabled by default**. Override via environment varia
 # Authentication
 NLMCP_AUTH_ENABLED=true
 NLMCP_AUTH_TOKEN=your-secret-token
+
+# Gemini API (v1.8.0+)
+GEMINI_API_KEY=your-api-key
+GEMINI_DEFAULT_MODEL=gemini-2.5-flash
+GEMINI_DEEP_RESEARCH_ENABLED=true
+GEMINI_TIMEOUT_MS=30000
 
 # Encryption
 NLMCP_USE_POST_QUANTUM=true
@@ -259,43 +413,6 @@ Or integrate in CI/CD:
 
 ---
 
-## How It Works
-
-```
-┌─────────────┐     ┌──────────────────┐     ┌─────────────┐
-│ Claude/     │────▶│  MCP Server      │────▶│ NotebookLM  │
-│ Codex       │     │  (This Fork)     │     │ (Google)    │
-└─────────────┘     └──────────────────┘     └─────────────┘
-                           │
-                    ┌──────┴──────┐
-                    │ 14 Security │
-                    │   Layers    │
-                    └─────────────┘
-                    • PQ Encryption
-                    • Secrets Scan
-                    • Cert Pinning
-                    • Memory Wipe
-                    • Audit Logs
-                    • Rate Limits
-                    • ...
-```
-
-Your agent asks questions → Security layers protect the pipeline → NotebookLM answers from your docs.
-
----
-
-## Original Features (Preserved)
-
-All original functionality from [PleasePrompto/notebooklm-mcp](https://github.com/PleasePrompto/notebooklm-mcp):
-
-- **Zero hallucinations** — NotebookLM only answers from your uploaded docs
-- **Autonomous research** — Claude asks follow-up questions automatically
-- **Smart library** — Save notebooks with tags, auto-select by context
-- **Cross-tool sharing** — Works with Claude Code, Codex, Cursor, etc.
-- **Tool profiles** — Minimal, standard, or full tool sets
-
----
-
 ## Comparison
 
 | Feature | Original | This Fork |
@@ -303,6 +420,10 @@ All original functionality from [PleasePrompto/notebooklm-mcp](https://github.co
 | Zero-hallucination Q&A | ✅ | ✅ |
 | Library management | ✅ | ✅ |
 | Multi-client support | ✅ | ✅ |
+| **Gemini Deep Research** | ❌ | ✅ **NEW** |
+| **Gemini Query with Grounding** | ❌ | ✅ **NEW** |
+| **Source Management** | ❌ | ✅ |
+| **Audio Overview Generation** | ❌ | ✅ |
 | **Cross-platform (Linux/macOS/Windows)** | ⚠️ | ✅ |
 | **Post-quantum encryption** | ❌ | ✅ |
 | **Secrets scanning** | ❌ | ✅ |
@@ -311,6 +432,20 @@ All original functionality from [PleasePrompto/notebooklm-mcp](https://github.co
 | **Audit logging** | ❌ | ✅ |
 | **MCP authentication** | ❌ | ✅ |
 | **Prompt injection detection** | ❌ | ✅ |
+| **Enterprise Compliance (GDPR/SOC2/CSSF)** | ❌ | ✅ |
+
+---
+
+## Version History
+
+| Version | Highlights |
+|---------|------------|
+| **v1.8.0** | Gemini Interactions API: Deep Research, Query with Grounding, Background Tasks |
+| **v1.7.0** | Source management, batch operations, audio generation, webhooks |
+| **v1.6.0** | Enterprise compliance: GDPR, SOC2 Type II, CSSF |
+| **v1.5.0** | Cross-platform support (Windows ACLs, macOS, Linux) |
+| **v1.4.0** | Post-quantum encryption, secrets scanning |
+| **v1.3.0** | Certificate pinning, audit logging |
 
 ---
 
@@ -327,6 +462,7 @@ Email: support@pantheonsecurity.io
 - **Original MCP Server**: [Gérôme Dexheimer](https://github.com/PleasePrompto) — [notebooklm-mcp](https://github.com/PleasePrompto/notebooklm-mcp)
 - **Security Hardening**: [Pantheon Security](https://pantheonsecurity.io)
 - **Post-Quantum Crypto**: [@noble/post-quantum](https://www.npmjs.com/package/@noble/post-quantum)
+- **Gemini API**: [Google AI](https://ai.google.dev/)
 
 ## License
 
@@ -338,6 +474,8 @@ MIT — Same as original.
 
 **Security hardened with 🔒 by [Pantheon Security](https://pantheonsecurity.io)**
 
-[Full Security Documentation](./SECURITY.md) • [Report Vulnerability](mailto:support@pantheonsecurity.io)
+**Powered by Google Gemini 🚀**
+
+[Full Security Documentation](./SECURITY.md) • [Compliance Guide](./docs/COMPLIANCE-SPEC.md) • [Report Vulnerability](mailto:support@pantheonsecurity.io)
 
 </div>
