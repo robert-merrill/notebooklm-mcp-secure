@@ -76,3 +76,20 @@ export interface LibraryStats {
   total_queries: number;
   last_modified: string;
 }
+
+/**
+ * Project information for per-project library support
+ */
+export interface ProjectInfo {
+  id: string; // Unique identifier (hash of path)
+  name: string; // Project name (from package.json or directory name)
+  path: string; // Absolute path to project root
+  type: "git" | "npm" | "directory"; // How project was detected
+}
+
+/**
+ * Extended library with project context
+ */
+export interface ProjectLibrary extends Library {
+  project?: ProjectInfo; // Optional project context
+}

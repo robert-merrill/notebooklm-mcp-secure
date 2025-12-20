@@ -249,6 +249,34 @@ class NotebookLMMCPServer {
             result = await this.toolHandlers.handleGetLibraryStats();
             break;
 
+          case "export_library":
+            result = await this.toolHandlers.handleExportLibrary(
+              args as { format?: "json" | "csv"; output_path?: string }
+            );
+            break;
+
+          case "get_quota":
+            result = await this.toolHandlers.handleGetQuota();
+            break;
+
+          case "set_quota_tier":
+            result = await this.toolHandlers.handleSetQuotaTier(
+              args as { tier: "free" | "pro" | "ultra" }
+            );
+            break;
+
+          case "get_project_info":
+            result = await this.toolHandlers.handleGetProjectInfo();
+            break;
+
+          case "create_notebook":
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            result = await this.toolHandlers.handleCreateNotebook(
+              args as any,
+              sendProgress
+            );
+            break;
+
           case "list_sessions":
             result = await this.toolHandlers.handleListSessions();
             break;
@@ -286,6 +314,106 @@ class NotebookLMMCPServer {
           case "cleanup_data":
             result = await this.toolHandlers.handleCleanupData(
               args as { confirm: boolean }
+            );
+            break;
+
+          case "sync_library":
+            result = await this.toolHandlers.handleSyncLibrary(
+              args as { auto_fix?: boolean; show_browser?: boolean }
+            );
+            break;
+
+          case "batch_create_notebooks":
+            result = await this.toolHandlers.handleBatchCreateNotebooks(
+              args as {
+                notebooks: Array<{
+                  name: string;
+                  sources: Array<{ type: "url" | "text" | "file"; value: string; title?: string }>;
+                  description?: string;
+                  topics?: string[];
+                }>;
+                stop_on_error?: boolean;
+                show_browser?: boolean;
+              },
+              sendProgress
+            );
+            break;
+
+          case "list_sources":
+            result = await this.toolHandlers.handleListSources(
+              args as { notebook_id?: string; notebook_url?: string }
+            );
+            break;
+
+          case "add_source":
+            result = await this.toolHandlers.handleAddSource(
+              args as {
+                notebook_id?: string;
+                notebook_url?: string;
+                source: { type: "url" | "text" | "file"; value: string; title?: string };
+              }
+            );
+            break;
+
+          case "remove_source":
+            result = await this.toolHandlers.handleRemoveSource(
+              args as {
+                notebook_id?: string;
+                notebook_url?: string;
+                source_id: string;
+              }
+            );
+            break;
+
+          case "generate_audio_overview":
+            result = await this.toolHandlers.handleGenerateAudioOverview(
+              args as { notebook_id?: string; notebook_url?: string }
+            );
+            break;
+
+          case "get_audio_status":
+            result = await this.toolHandlers.handleGetAudioStatus(
+              args as { notebook_id?: string; notebook_url?: string }
+            );
+            break;
+
+          case "download_audio":
+            result = await this.toolHandlers.handleDownloadAudio(
+              args as {
+                notebook_id?: string;
+                notebook_url?: string;
+                output_path?: string;
+              }
+            );
+            break;
+
+          case "configure_webhook":
+            result = await this.toolHandlers.handleConfigureWebhook(
+              args as {
+                id?: string;
+                name: string;
+                url: string;
+                enabled?: boolean;
+                events?: string[];
+                format?: "generic" | "slack" | "discord" | "teams";
+                secret?: string;
+              }
+            );
+            break;
+
+          case "list_webhooks":
+            result = await this.toolHandlers.handleListWebhooks();
+            break;
+
+          case "test_webhook":
+            result = await this.toolHandlers.handleTestWebhook(
+              args as { id: string }
+            );
+            break;
+
+          case "remove_webhook":
+            result = await this.toolHandlers.handleRemoveWebhook(
+              args as { id: string }
             );
             break;
 

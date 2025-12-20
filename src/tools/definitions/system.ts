@@ -151,4 +151,168 @@ export const systemTools: Tool[] = [
       required: ["confirm"],
     },
   },
+  {
+    name: "get_quota",
+    description:
+      "Get current quota status including license tier, usage, and limits.\n\n" +
+      "Returns:\n" +
+      "- tier: 'free', 'pro', 'ultra', or 'unknown'\n" +
+      "- notebooks: used/limit/percent\n" +
+      "- sources: limit per notebook\n" +
+      "- queries: used today/limit/percent\n\n" +
+      "Quota Limits by Tier:\n" +
+      "- Free: 100 notebooks, 50 sources/notebook, 50 queries/day\n" +
+      "- Pro: 500 notebooks, 300 sources/notebook, 500 queries/day\n" +
+      "- Ultra: 500 notebooks, 600 sources/notebook, 5000 queries/day\n\n" +
+      "The tier is auto-detected from NotebookLM UI when you use the service. " +
+      "Query counts reset daily at midnight.",
+    inputSchema: {
+      type: "object",
+      properties: {},
+    },
+  },
+  {
+    name: "set_quota_tier",
+    description:
+      "Manually set your NotebookLM license tier.\n\n" +
+      "Use this if:\n" +
+      "- Auto-detection failed (shows 'unknown')\n" +
+      "- You want to override the detected tier\n" +
+      "- You upgraded/downgraded your plan\n\n" +
+      "Tiers:\n" +
+      "- free: 100 notebooks, 50 sources, 50 queries/day\n" +
+      "- pro: 500 notebooks, 300 sources, 500 queries/day\n" +
+      "- ultra: 500 notebooks, 600 sources, 5000 queries/day",
+    inputSchema: {
+      type: "object",
+      properties: {
+        tier: {
+          type: "string",
+          enum: ["free", "pro", "ultra"],
+          description: "License tier to set",
+        },
+      },
+      required: ["tier"],
+    },
+  },
+  {
+    name: "get_project_info",
+    description:
+      "Get current project context and library location.\n\n" +
+      "Detects the project from the current working directory using:\n" +
+      "1. Git repository root (looks for .git directory)\n" +
+      "2. package.json location (for npm projects)\n" +
+      "3. Current directory as fallback\n\n" +
+      "Returns:\n" +
+      "- project: { id, name, path, type } or null if using global library\n" +
+      "- library_path: Path to the active library.json file\n" +
+      "- is_project_library: Whether using per-project or global library\n\n" +
+      "Use this to understand which library context is active.",
+    inputSchema: {
+      type: "object",
+      properties: {},
+    },
+  },
+  {
+    name: "configure_webhook",
+    description:
+      "Add or update a webhook endpoint for event notifications.\n\n" +
+      "## Supported Formats\n" +
+      "- generic: Standard JSON payload\n" +
+      "- slack: Slack webhook format\n" +
+      "- discord: Discord webhook format\n" +
+      "- teams: Microsoft Teams format\n\n" +
+      "## Events\n" +
+      "Subscribe to specific events or use '*' for all events:\n" +
+      "- question_answered, notebook_created, notebook_deleted\n" +
+      "- source_added, source_removed\n" +
+      "- session_created, session_expired\n" +
+      "- auth_required, rate_limit_hit, security_incident\n" +
+      "- quota_warning, audio_generated, batch_complete\n\n" +
+      "## Example\n" +
+      "```json\n" +
+      "{\n" +
+      '  \"name\": \"Slack Notifications\",\n' +
+      '  \"url\": \"https://hooks.slack.com/...\",\n' +
+      '  \"format\": \"slack\",\n' +
+      '  \"events\": [\"notebook_created\", \"security_incident\"]\n' +
+      "}\n" +
+      "```",
+    inputSchema: {
+      type: "object",
+      properties: {
+        id: {
+          type: "string",
+          description: "Webhook ID (for updates). Omit to create new.",
+        },
+        name: {
+          type: "string",
+          description: "Display name for the webhook",
+        },
+        url: {
+          type: "string",
+          description: "Webhook endpoint URL",
+        },
+        enabled: {
+          type: "boolean",
+          description: "Enable/disable the webhook (default: true)",
+        },
+        events: {
+          type: "array",
+          items: { type: "string" },
+          description: 'Events to subscribe to. Use ["*"] for all events.',
+        },
+        format: {
+          type: "string",
+          enum: ["generic", "slack", "discord", "teams"],
+          description: "Payload format (default: generic)",
+        },
+        secret: {
+          type: "string",
+          description: "Secret for HMAC signature (X-Webhook-Signature header)",
+        },
+      },
+      required: ["name", "url"],
+    },
+  },
+  {
+    name: "list_webhooks",
+    description:
+      "List all configured webhooks with their status and statistics.\n\n" +
+      "Returns array of webhooks with: id, name, url, enabled, events, format.",
+    inputSchema: {
+      type: "object",
+      properties: {},
+    },
+  },
+  {
+    name: "test_webhook",
+    description:
+      "Send a test event to a webhook to verify it's working.\n\n" +
+      "Sends a sample 'question_answered' event and returns success/failure.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        id: {
+          type: "string",
+          description: "Webhook ID to test",
+        },
+      },
+      required: ["id"],
+    },
+  },
+  {
+    name: "remove_webhook",
+    description: "Remove a configured webhook by ID.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        id: {
+          type: "string",
+          description: "Webhook ID to remove",
+        },
+      },
+      required: ["id"],
+    },
+  },
 ];

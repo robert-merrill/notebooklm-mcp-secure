@@ -28,6 +28,14 @@ import {
 import { audit } from "../utils/audit-logger.js";
 import { validateResponse } from "../utils/response-validator.js";
 import { CleanupManager } from "../utils/cleanup-manager.js";
+import { NotebookCreator } from "../notebook-creation/notebook-creator.js";
+import { NotebookSync, type SyncResult } from "../notebook-creation/notebook-sync.js";
+import { SourceManager, type ListSourcesResult, type AddSourceResult, type RemoveSourceResult } from "../notebook-creation/source-manager.js";
+import { AudioManager, type AudioStatus, type GenerateAudioResult, type DownloadAudioResult } from "../notebook-creation/audio-manager.js";
+import type { CreateNotebookInput, CreatedNotebook, NotebookSource } from "../notebook-creation/types.js";
+import { getWebhookDispatcher, type WebhookConfig, type WebhookStats } from "../webhooks/index.js";
+import type { EventType } from "../events/event-types.js";
+import { getQuotaManager } from "../quota/index.js";
 
 const FOLLOW_UP_REMINDER =
   "\n\nEXTREMELY IMPORTANT: Is that ALL you need to know? You can always ask another question using the same session ID! Think about it carefully: before you reply to the user, review their original request and this answer. If anything is still unclear or missing, ask me another question first.";
@@ -109,6 +117,18 @@ export class ToolHandlers {
         return {
           success: false,
           error: `Rate limit exceeded. Please wait before making more requests. Remaining: ${this.rateLimiter.getRemaining(rateLimitKey)}`,
+        };
+      }
+
+      // === QUOTA CHECK ===
+      const quotaManager = getQuotaManager();
+      const canQuery = quotaManager.canMakeQuery();
+      if (!canQuery.allowed) {
+        log.warning(`⚠️ Quota limit: ${canQuery.reason}`);
+        await audit.tool("ask_question", args, false, Date.now() - startTime, canQuery.reason || "Query quota exceeded");
+        return {
+          success: false,
+          error: canQuery.reason || "Daily query limit reached. Try again tomorrow or upgrade your plan.",
         };
       }
     } catch (error) {
@@ -228,6 +248,9 @@ export class ToolHandlers {
         await sendProgress?.("Question answered successfully!", 5, 5);
 
         log.success(`✅ [TOOL] ask_question completed successfully`);
+
+        // Update quota tracking
+        getQuotaManager().incrementQueryCount();
 
         // Audit: successful tool call
         await audit.tool("ask_question", {
@@ -918,6 +941,539 @@ export class ToolHandlers {
   }
 
   /**
+   * Handle export_library tool
+   *
+   * Exports notebook library to a backup file (JSON or CSV).
+   */
+  async handleExportLibrary(args: {
+    format?: "json" | "csv";
+    output_path?: string;
+  }): Promise<ToolResult<{
+    file_path: string;
+    format: string;
+    notebook_count: number;
+    size_bytes: number;
+  }>> {
+    const format = args.format || "json";
+    log.info(`🔧 [TOOL] export_library called`);
+    log.info(`  Format: ${format}`);
+
+    try {
+      const notebooks = this.library.listNotebooks();
+      const stats = this.library.getStats();
+
+      // Generate default output path if not provided
+      const date = new Date().toISOString().split("T")[0];
+      const homeDir = process.env.HOME || process.env.USERPROFILE || ".";
+      const defaultPath = `${homeDir}/notebooklm-library-backup-${date}.${format}`;
+      const outputPath = args.output_path || defaultPath;
+
+      let content: string;
+
+      if (format === "csv") {
+        // CSV format: name, url, topics, last_used, use_count
+        const headers = ["name", "url", "topics", "description", "last_used", "use_count"];
+        const rows = notebooks.map((nb: { name?: string; url: string; topics?: string[]; description?: string; last_used?: string; use_count?: number }) => [
+          `"${(nb.name || "").replace(/"/g, '""')}"`,
+          `"${nb.url}"`,
+          `"${(nb.topics || []).join("; ")}"`,
+          `"${(nb.description || "").replace(/"/g, '""')}"`,
+          nb.last_used || "",
+          String(nb.use_count || 0),
+        ]);
+        content = [headers.join(","), ...rows.map((r: string[]) => r.join(","))].join("\n");
+      } else {
+        // JSON format: full library data
+        content = JSON.stringify(
+          {
+            exported_at: new Date().toISOString(),
+            version: "1.0",
+            stats: {
+              total_notebooks: stats.total_notebooks,
+              total_queries: stats.total_queries,
+            },
+            notebooks: notebooks,
+          },
+          null,
+          2
+        );
+      }
+
+      // Write file with secure permissions
+      const fs = await import("fs");
+      fs.writeFileSync(outputPath, content, { mode: 0o600 });
+
+      const fileStats = fs.statSync(outputPath);
+
+      log.success(`✅ [TOOL] export_library completed: ${outputPath}`);
+      return {
+        success: true,
+        data: {
+          file_path: outputPath,
+          format,
+          notebook_count: notebooks.length,
+          size_bytes: fileStats.size,
+        },
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      log.error(`❌ [TOOL] export_library failed: ${errorMessage}`);
+      return {
+        success: false,
+        error: errorMessage,
+      };
+    }
+  }
+
+  /**
+   * Handle get_project_info tool
+   *
+   * Returns current project context and library location.
+   */
+  async handleGetProjectInfo(): Promise<ToolResult<{
+    project: { id: string; name: string; path: string; type: string } | null;
+    library_path: string;
+    is_project_library: boolean;
+    detected_project: { id: string; name: string; path: string; type: string } | null;
+  }>> {
+    log.info(`🔧 [TOOL] get_project_info called`);
+
+    try {
+      // Get info from the library instance
+      const projectInfo = this.library.getProjectInfo();
+      const libraryPath = this.library.getLibraryPath();
+      const isProjectLibrary = this.library.isProjectLibrary();
+
+      // Also detect what project would be detected from cwd
+      const { NotebookLibrary: NL } = await import("../library/notebook-library.js");
+      const detectedProject = NL.detectCurrentProject();
+
+      log.success(`✅ [TOOL] get_project_info completed`);
+      return {
+        success: true,
+        data: {
+          project: projectInfo,
+          library_path: libraryPath,
+          is_project_library: isProjectLibrary,
+          detected_project: detectedProject,
+        },
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      log.error(`❌ [TOOL] get_project_info failed: ${errorMessage}`);
+      return {
+        success: false,
+        error: errorMessage,
+      };
+    }
+  }
+
+  /**
+   * Handle get_quota tool
+   *
+   * Returns current quota status including license tier, usage, and limits.
+   */
+  async handleGetQuota(): Promise<ToolResult<{
+    tier: string;
+    notebooks: { used: number; limit: number; percent: number };
+    sources: { limit: number };
+    queries: { used: number; limit: number; percent: number };
+    auto_detected: boolean;
+    last_updated: string;
+  }>> {
+    log.info(`🔧 [TOOL] get_quota called`);
+
+    try {
+      const quotaManager = getQuotaManager();
+      const status = quotaManager.getStatus();
+      const settings = quotaManager.getSettings();
+
+      log.success(`✅ [TOOL] get_quota completed (tier: ${status.tier})`);
+      return {
+        success: true,
+        data: {
+          tier: status.tier,
+          notebooks: status.notebooks,
+          sources: status.sources,
+          queries: status.queries,
+          auto_detected: settings.autoDetected,
+          last_updated: settings.usage.lastUpdated,
+        },
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      log.error(`❌ [TOOL] get_quota failed: ${errorMessage}`);
+      return {
+        success: false,
+        error: errorMessage,
+      };
+    }
+  }
+
+  /**
+   * Handle set_quota_tier tool
+   *
+   * Manually set the license tier to override auto-detection.
+   */
+  async handleSetQuotaTier(args: {
+    tier: "free" | "pro" | "ultra";
+  }): Promise<ToolResult<{
+    tier: string;
+    limits: { notebooks: number; sourcesPerNotebook: number; queriesPerDay: number };
+    message: string;
+  }>> {
+    log.info(`🔧 [TOOL] set_quota_tier called`);
+    log.info(`  Tier: ${args.tier}`);
+
+    try {
+      const quotaManager = getQuotaManager();
+      quotaManager.setTier(args.tier);
+      const settings = quotaManager.getSettings();
+
+      log.success(`✅ [TOOL] set_quota_tier completed (tier: ${args.tier})`);
+      return {
+        success: true,
+        data: {
+          tier: settings.tier,
+          limits: {
+            notebooks: settings.limits.notebooks,
+            sourcesPerNotebook: settings.limits.sourcesPerNotebook,
+            queriesPerDay: settings.limits.queriesPerDay,
+          },
+          message: `License tier set to ${args.tier}. Limits updated accordingly.`,
+        },
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      log.error(`❌ [TOOL] set_quota_tier failed: ${errorMessage}`);
+      return {
+        success: false,
+        error: errorMessage,
+      };
+    }
+  }
+
+  /**
+   * Handle create_notebook tool
+   *
+   * Creates a new NotebookLM notebook with sources programmatically.
+   */
+  async handleCreateNotebook(
+    args: CreateNotebookInput,
+    sendProgress?: ProgressCallback
+  ): Promise<ToolResult<CreatedNotebook>> {
+    log.info(`🔧 [TOOL] create_notebook called`);
+    log.info(`  Name: ${args.name}`);
+    log.info(`  Sources: ${args.sources?.length || 0}`);
+
+    try {
+      // Validate inputs
+      if (!args.name || typeof args.name !== "string") {
+        throw new Error("Notebook name is required");
+      }
+
+      if (!args.sources || !Array.isArray(args.sources) || args.sources.length === 0) {
+        throw new Error("At least one source is required");
+      }
+
+      // Validate each source
+      for (const source of args.sources) {
+        if (!source.type || !["url", "text", "file"].includes(source.type)) {
+          throw new Error(`Invalid source type: ${source.type}. Must be url, text, or file.`);
+        }
+        if (!source.value || typeof source.value !== "string") {
+          throw new Error("Source value is required");
+        }
+        if (source.type === "url") {
+          try {
+            new URL(source.value);
+          } catch {
+            throw new Error(`Invalid URL: ${source.value}`);
+          }
+        }
+      }
+
+      // === QUOTA CHECK ===
+      const quotaManager = getQuotaManager();
+      const canCreate = quotaManager.canCreateNotebook();
+      if (!canCreate.allowed) {
+        log.warning(`⚠️ Quota limit: ${canCreate.reason}`);
+        return {
+          success: false,
+          error: canCreate.reason || "Notebook quota limit reached",
+        };
+      }
+
+      // Check source limit
+      const sourceLimits = quotaManager.getLimits();
+      if (args.sources.length > sourceLimits.sourcesPerNotebook) {
+        const reason = `Too many sources (${args.sources.length}). Limit is ${sourceLimits.sourcesPerNotebook} per notebook.`;
+        log.warning(`⚠️ Quota limit: ${reason}`);
+        return {
+          success: false,
+          error: reason,
+        };
+      }
+
+      // Get the shared context manager from session manager
+      const contextManager = this.sessionManager.getContextManager();
+
+      // Create notebook
+      const creator = new NotebookCreator(this.authManager, contextManager);
+      const result = await creator.createNotebook({
+        name: args.name,
+        sources: args.sources,
+        sendProgress,
+        browserOptions: args.browser_options || (args.show_browser ? { show: true } : undefined),
+      });
+
+      // Auto-add to library if requested (default: true)
+      if (args.auto_add_to_library !== false) {
+        try {
+          this.library.addNotebook({
+            url: result.url,
+            name: args.name,
+            description: args.description || `Created ${new Date().toLocaleDateString()}`,
+            topics: args.topics || [],
+          });
+          log.success(`✅ Added notebook to library: ${args.name}`);
+        } catch (libError) {
+          log.warning(`⚠️ Failed to add to library: ${libError}`);
+          // Don't fail the whole operation
+        }
+      }
+
+      // Update quota tracking
+      quotaManager.incrementNotebookCount();
+
+      // Audit log
+      await audit.tool("create_notebook", {
+        name: args.name,
+        sourceCount: args.sources.length,
+        url: result.url,
+      }, true, 0);
+
+      log.success(`✅ [TOOL] create_notebook completed: ${result.url}`);
+
+      return {
+        success: true,
+        data: result,
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      log.error(`❌ [TOOL] create_notebook failed: ${errorMessage}`);
+
+      await audit.tool("create_notebook", {
+        name: args.name,
+        error: errorMessage,
+      }, false, 0, errorMessage);
+
+      return {
+        success: false,
+        error: errorMessage,
+      };
+    }
+  }
+
+  /**
+   * Handle batch_create_notebooks tool
+   *
+   * Creates multiple notebooks in a single batch operation.
+   */
+  async handleBatchCreateNotebooks(
+    args: {
+      notebooks: Array<{
+        name: string;
+        sources: Array<{ type: "url" | "text" | "file"; value: string; title?: string }>;
+        description?: string;
+        topics?: string[];
+      }>;
+      stop_on_error?: boolean;
+      show_browser?: boolean;
+    },
+    sendProgress?: ProgressCallback
+  ): Promise<ToolResult<{
+    total: number;
+    succeeded: number;
+    failed: number;
+    results: Array<{
+      name: string;
+      success: boolean;
+      url?: string;
+      error?: string;
+    }>;
+  }>> {
+    log.info(`🔧 [TOOL] batch_create_notebooks called`);
+    log.info(`  Notebooks: ${args.notebooks.length}`);
+    log.info(`  Stop on error: ${args.stop_on_error || false}`);
+
+    try {
+      // Validate input
+      if (!args.notebooks || !Array.isArray(args.notebooks)) {
+        throw new Error("notebooks array is required");
+      }
+
+      if (args.notebooks.length === 0) {
+        throw new Error("At least one notebook is required");
+      }
+
+      if (args.notebooks.length > 10) {
+        throw new Error("Maximum 10 notebooks per batch");
+      }
+
+      const results: Array<{
+        name: string;
+        success: boolean;
+        url?: string;
+        error?: string;
+      }> = [];
+
+      const total = args.notebooks.length;
+      let succeeded = 0;
+      let failed = 0;
+
+      for (let i = 0; i < args.notebooks.length; i++) {
+        const notebook = args.notebooks[i];
+
+        await sendProgress?.(
+          `Creating notebook ${i + 1}/${total}: ${notebook.name}`,
+          i,
+          total
+        );
+
+        log.info(`  📓 Creating notebook ${i + 1}/${total}: ${notebook.name}`);
+
+        try {
+          const result = await this.handleCreateNotebook({
+            name: notebook.name,
+            sources: notebook.sources,
+            description: notebook.description,
+            topics: notebook.topics,
+            auto_add_to_library: true,
+            show_browser: args.show_browser,
+          });
+
+          if (result.success && result.data) {
+            results.push({
+              name: notebook.name,
+              success: true,
+              url: result.data.url,
+            });
+            succeeded++;
+            log.success(`    ✅ Created: ${result.data.url}`);
+          } else {
+            results.push({
+              name: notebook.name,
+              success: false,
+              error: result.error || "Unknown error",
+            });
+            failed++;
+            log.error(`    ❌ Failed: ${result.error}`);
+
+            if (args.stop_on_error) {
+              log.warning(`  ⚠️ Stopping batch due to error (stop_on_error=true)`);
+              break;
+            }
+          }
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          results.push({
+            name: notebook.name,
+            success: false,
+            error: errorMessage,
+          });
+          failed++;
+          log.error(`    ❌ Exception: ${errorMessage}`);
+
+          if (args.stop_on_error) {
+            log.warning(`  ⚠️ Stopping batch due to exception (stop_on_error=true)`);
+            break;
+          }
+        }
+
+        // Delay between notebooks to avoid rate limiting
+        if (i < args.notebooks.length - 1) {
+          const delay = 2000 + Math.random() * 2000; // 2-4 seconds
+          await new Promise((resolve) => setTimeout(resolve, delay));
+        }
+      }
+
+      await sendProgress?.(`Batch complete: ${succeeded}/${total} succeeded`, total, total);
+
+      log.success(`✅ [TOOL] batch_create_notebooks completed: ${succeeded}/${total} succeeded`);
+
+      return {
+        success: failed === 0,
+        data: {
+          total,
+          succeeded,
+          failed,
+          results,
+        },
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      log.error(`❌ [TOOL] batch_create_notebooks failed: ${errorMessage}`);
+      return {
+        success: false,
+        error: errorMessage,
+      };
+    }
+  }
+
+  /**
+   * Handle sync_library tool
+   *
+   * Syncs local library with actual NotebookLM notebooks.
+   */
+  async handleSyncLibrary(
+    args: { auto_fix?: boolean; show_browser?: boolean }
+  ): Promise<ToolResult<SyncResult>> {
+    log.info(`🔧 [TOOL] sync_library called`);
+    log.info(`  Auto-fix: ${args.auto_fix || false}`);
+    log.info(`  Show browser: ${args.show_browser || false}`);
+
+    try {
+      // Get the shared context manager from session manager
+      const contextManager = this.sessionManager.getContextManager();
+
+      // Sync library
+      const sync = new NotebookSync(this.authManager, contextManager, this.library);
+      const result = await sync.syncLibrary({
+        autoFix: args.auto_fix,
+        showBrowser: args.show_browser,
+      });
+
+      // Audit log
+      await audit.tool("sync_library", {
+        matched: result.matched.length,
+        stale: result.staleEntries.length,
+        missing: result.missingNotebooks.length,
+        autoFix: args.auto_fix,
+      }, true, 0);
+
+      log.success(`✅ [TOOL] sync_library completed`);
+
+      return {
+        success: true,
+        data: result,
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      log.error(`❌ [TOOL] sync_library failed: ${errorMessage}`);
+
+      await audit.tool("sync_library", {
+        error: errorMessage,
+      }, false, 0, errorMessage);
+
+      return {
+        success: false,
+        error: errorMessage,
+      };
+    }
+  }
+
+  /**
    * Handle cleanup_data tool
    *
    * ULTRATHINK Deep Cleanup - scans entire system for ALL NotebookLM MCP files
@@ -1008,6 +1564,551 @@ export class ToolHandlers {
         success: false,
         error: errorMessage,
       };
+    }
+  }
+
+  /**
+   * Handle list_sources tool
+   *
+   * List all sources in a NotebookLM notebook.
+   */
+  async handleListSources(args: {
+    notebook_id?: string;
+    notebook_url?: string;
+  }): Promise<ToolResult<ListSourcesResult>> {
+    log.info(`🔧 [TOOL] list_sources called`);
+
+    try {
+      // Resolve notebook URL
+      let notebookUrl = args.notebook_url;
+
+      if (!notebookUrl && args.notebook_id) {
+        const notebook = this.library.getNotebook(args.notebook_id);
+        if (!notebook) {
+          throw new Error(`Notebook not found in library: ${args.notebook_id}`);
+        }
+        notebookUrl = notebook.url;
+        log.info(`  Resolved notebook: ${notebook.name}`);
+      } else if (!notebookUrl) {
+        const active = this.library.getActiveNotebook();
+        if (active) {
+          notebookUrl = active.url;
+          log.info(`  Using active notebook: ${active.name}`);
+        } else {
+          throw new Error("No notebook specified. Provide notebook_id or notebook_url.");
+        }
+      }
+
+      // Validate URL
+      const safeUrl = validateNotebookUrl(notebookUrl);
+
+      // Get the shared context manager from session manager
+      const contextManager = this.sessionManager.getContextManager();
+
+      // List sources
+      const sourceManager = new SourceManager(this.authManager, contextManager);
+      const result = await sourceManager.listSources(safeUrl);
+
+      log.success(`✅ [TOOL] list_sources completed (${result.count} sources)`);
+      return {
+        success: true,
+        data: result,
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      log.error(`❌ [TOOL] list_sources failed: ${errorMessage}`);
+      return {
+        success: false,
+        error: errorMessage,
+      };
+    }
+  }
+
+  /**
+   * Handle add_source tool
+   *
+   * Add a source to an existing NotebookLM notebook.
+   */
+  async handleAddSource(args: {
+    notebook_id?: string;
+    notebook_url?: string;
+    source: NotebookSource;
+  }): Promise<ToolResult<AddSourceResult>> {
+    log.info(`🔧 [TOOL] add_source called`);
+    log.info(`  Source type: ${args.source?.type}`);
+
+    try {
+      // Validate source
+      if (!args.source || !args.source.type || !args.source.value) {
+        throw new Error("Source with type and value is required");
+      }
+
+      if (!["url", "text", "file"].includes(args.source.type)) {
+        throw new Error(`Invalid source type: ${args.source.type}. Must be url, text, or file.`);
+      }
+
+      // Resolve notebook URL
+      let notebookUrl = args.notebook_url;
+
+      if (!notebookUrl && args.notebook_id) {
+        const notebook = this.library.getNotebook(args.notebook_id);
+        if (!notebook) {
+          throw new Error(`Notebook not found in library: ${args.notebook_id}`);
+        }
+        notebookUrl = notebook.url;
+        log.info(`  Resolved notebook: ${notebook.name}`);
+      } else if (!notebookUrl) {
+        const active = this.library.getActiveNotebook();
+        if (active) {
+          notebookUrl = active.url;
+          log.info(`  Using active notebook: ${active.name}`);
+        } else {
+          throw new Error("No notebook specified. Provide notebook_id or notebook_url.");
+        }
+      }
+
+      // Validate URL
+      const safeUrl = validateNotebookUrl(notebookUrl);
+
+      // Get the shared context manager from session manager
+      const contextManager = this.sessionManager.getContextManager();
+
+      // Add source
+      const sourceManager = new SourceManager(this.authManager, contextManager);
+      const result = await sourceManager.addSource(safeUrl, args.source);
+
+      if (result.success) {
+        log.success(`✅ [TOOL] add_source completed`);
+      } else {
+        log.warning(`⚠️ [TOOL] add_source failed: ${result.error}`);
+      }
+
+      return {
+        success: result.success,
+        data: result,
+        ...(result.error && { error: result.error }),
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      log.error(`❌ [TOOL] add_source failed: ${errorMessage}`);
+      return {
+        success: false,
+        error: errorMessage,
+      };
+    }
+  }
+
+  /**
+   * Handle remove_source tool
+   *
+   * Remove a source from a NotebookLM notebook.
+   */
+  async handleRemoveSource(args: {
+    notebook_id?: string;
+    notebook_url?: string;
+    source_id: string;
+  }): Promise<ToolResult<RemoveSourceResult>> {
+    log.info(`🔧 [TOOL] remove_source called`);
+    log.info(`  Source ID: ${args.source_id}`);
+
+    try {
+      // Validate source_id
+      if (!args.source_id) {
+        throw new Error("source_id is required");
+      }
+
+      // Resolve notebook URL
+      let notebookUrl = args.notebook_url;
+
+      if (!notebookUrl && args.notebook_id) {
+        const notebook = this.library.getNotebook(args.notebook_id);
+        if (!notebook) {
+          throw new Error(`Notebook not found in library: ${args.notebook_id}`);
+        }
+        notebookUrl = notebook.url;
+        log.info(`  Resolved notebook: ${notebook.name}`);
+      } else if (!notebookUrl) {
+        const active = this.library.getActiveNotebook();
+        if (active) {
+          notebookUrl = active.url;
+          log.info(`  Using active notebook: ${active.name}`);
+        } else {
+          throw new Error("No notebook specified. Provide notebook_id or notebook_url.");
+        }
+      }
+
+      // Validate URL
+      const safeUrl = validateNotebookUrl(notebookUrl);
+
+      // Get the shared context manager from session manager
+      const contextManager = this.sessionManager.getContextManager();
+
+      // Remove source
+      const sourceManager = new SourceManager(this.authManager, contextManager);
+      const result = await sourceManager.removeSource(safeUrl, args.source_id);
+
+      if (result.success) {
+        log.success(`✅ [TOOL] remove_source completed`);
+      } else {
+        log.warning(`⚠️ [TOOL] remove_source failed: ${result.error}`);
+      }
+
+      return {
+        success: result.success,
+        data: result,
+        ...(result.error && { error: result.error }),
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      log.error(`❌ [TOOL] remove_source failed: ${errorMessage}`);
+      return {
+        success: false,
+        error: errorMessage,
+      };
+    }
+  }
+
+  /**
+   * Handle generate_audio_overview tool
+   *
+   * Triggers audio overview generation for a notebook.
+   */
+  async handleGenerateAudioOverview(args: {
+    notebook_id?: string;
+    notebook_url?: string;
+  }): Promise<ToolResult<GenerateAudioResult>> {
+    log.info(`🔧 [TOOL] generate_audio_overview called`);
+
+    try {
+      // Resolve notebook URL
+      let notebookUrl = args.notebook_url;
+
+      if (!notebookUrl && args.notebook_id) {
+        const notebook = this.library.getNotebook(args.notebook_id);
+        if (!notebook) {
+          throw new Error(`Notebook not found in library: ${args.notebook_id}`);
+        }
+        notebookUrl = notebook.url;
+        log.info(`  Resolved notebook: ${notebook.name}`);
+      } else if (!notebookUrl) {
+        const active = this.library.getActiveNotebook();
+        if (active) {
+          notebookUrl = active.url;
+          log.info(`  Using active notebook: ${active.name}`);
+        } else {
+          throw new Error("No notebook specified. Provide notebook_id or notebook_url.");
+        }
+      }
+
+      // Validate URL
+      const safeUrl = validateNotebookUrl(notebookUrl);
+
+      // Get the shared context manager from session manager
+      const contextManager = this.sessionManager.getContextManager();
+
+      // Generate audio
+      const audioManager = new AudioManager(this.authManager, contextManager);
+      const result = await audioManager.generateAudioOverview(safeUrl);
+
+      if (result.success) {
+        log.success(`✅ [TOOL] generate_audio_overview completed (status: ${result.status.status})`);
+      } else {
+        log.warning(`⚠️ [TOOL] generate_audio_overview: ${result.error}`);
+      }
+
+      return {
+        success: result.success,
+        data: result,
+        ...(result.error && { error: result.error }),
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      log.error(`❌ [TOOL] generate_audio_overview failed: ${errorMessage}`);
+      return {
+        success: false,
+        error: errorMessage,
+      };
+    }
+  }
+
+  /**
+   * Handle get_audio_status tool
+   *
+   * Checks the audio generation status for a notebook.
+   */
+  async handleGetAudioStatus(args: {
+    notebook_id?: string;
+    notebook_url?: string;
+  }): Promise<ToolResult<AudioStatus>> {
+    log.info(`🔧 [TOOL] get_audio_status called`);
+
+    try {
+      // Resolve notebook URL
+      let notebookUrl = args.notebook_url;
+
+      if (!notebookUrl && args.notebook_id) {
+        const notebook = this.library.getNotebook(args.notebook_id);
+        if (!notebook) {
+          throw new Error(`Notebook not found in library: ${args.notebook_id}`);
+        }
+        notebookUrl = notebook.url;
+        log.info(`  Resolved notebook: ${notebook.name}`);
+      } else if (!notebookUrl) {
+        const active = this.library.getActiveNotebook();
+        if (active) {
+          notebookUrl = active.url;
+          log.info(`  Using active notebook: ${active.name}`);
+        } else {
+          throw new Error("No notebook specified. Provide notebook_id or notebook_url.");
+        }
+      }
+
+      // Validate URL
+      const safeUrl = validateNotebookUrl(notebookUrl);
+
+      // Get the shared context manager from session manager
+      const contextManager = this.sessionManager.getContextManager();
+
+      // Get status
+      const audioManager = new AudioManager(this.authManager, contextManager);
+      const status = await audioManager.getAudioStatus(safeUrl);
+
+      log.success(`✅ [TOOL] get_audio_status completed (status: ${status.status})`);
+
+      return {
+        success: true,
+        data: status,
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      log.error(`❌ [TOOL] get_audio_status failed: ${errorMessage}`);
+      return {
+        success: false,
+        error: errorMessage,
+      };
+    }
+  }
+
+  /**
+   * Handle download_audio tool
+   *
+   * Downloads the generated audio file.
+   */
+  async handleDownloadAudio(args: {
+    notebook_id?: string;
+    notebook_url?: string;
+    output_path?: string;
+  }): Promise<ToolResult<DownloadAudioResult>> {
+    log.info(`🔧 [TOOL] download_audio called`);
+
+    try {
+      // Resolve notebook URL
+      let notebookUrl = args.notebook_url;
+
+      if (!notebookUrl && args.notebook_id) {
+        const notebook = this.library.getNotebook(args.notebook_id);
+        if (!notebook) {
+          throw new Error(`Notebook not found in library: ${args.notebook_id}`);
+        }
+        notebookUrl = notebook.url;
+        log.info(`  Resolved notebook: ${notebook.name}`);
+      } else if (!notebookUrl) {
+        const active = this.library.getActiveNotebook();
+        if (active) {
+          notebookUrl = active.url;
+          log.info(`  Using active notebook: ${active.name}`);
+        } else {
+          throw new Error("No notebook specified. Provide notebook_id or notebook_url.");
+        }
+      }
+
+      // Validate URL
+      const safeUrl = validateNotebookUrl(notebookUrl);
+
+      // Get the shared context manager from session manager
+      const contextManager = this.sessionManager.getContextManager();
+
+      // Download audio
+      const audioManager = new AudioManager(this.authManager, contextManager);
+      const result = await audioManager.downloadAudio(safeUrl, args.output_path);
+
+      if (result.success) {
+        log.success(`✅ [TOOL] download_audio completed: ${result.filePath}`);
+      } else {
+        log.warning(`⚠️ [TOOL] download_audio: ${result.error}`);
+      }
+
+      return {
+        success: result.success,
+        data: result,
+        ...(result.error && { error: result.error }),
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      log.error(`❌ [TOOL] download_audio failed: ${errorMessage}`);
+      return {
+        success: false,
+        error: errorMessage,
+      };
+    }
+  }
+
+  /**
+   * Handle configure_webhook tool
+   *
+   * Add or update a webhook endpoint.
+   */
+  async handleConfigureWebhook(args: {
+    id?: string;
+    name: string;
+    url: string;
+    enabled?: boolean;
+    events?: string[];
+    format?: "generic" | "slack" | "discord" | "teams";
+    secret?: string;
+  }): Promise<ToolResult<WebhookConfig>> {
+    log.info(`🔧 [TOOL] configure_webhook called`);
+    log.info(`  Name: ${args.name}`);
+
+    try {
+      const dispatcher = getWebhookDispatcher();
+
+      if (args.id) {
+        // Update existing
+        const updated = dispatcher.updateWebhook({
+          id: args.id,
+          name: args.name,
+          url: args.url,
+          enabled: args.enabled,
+          events: args.events as EventType[] | ["*"],
+          format: args.format,
+          secret: args.secret,
+        });
+
+        if (!updated) {
+          throw new Error(`Webhook not found: ${args.id}`);
+        }
+
+        log.success(`✅ [TOOL] configure_webhook updated: ${updated.name}`);
+        return { success: true, data: updated };
+      } else {
+        // Create new
+        const webhook = dispatcher.addWebhook({
+          name: args.name,
+          url: args.url,
+          events: args.events as EventType[] | ["*"],
+          format: args.format,
+          secret: args.secret,
+        });
+
+        log.success(`✅ [TOOL] configure_webhook created: ${webhook.name}`);
+        return { success: true, data: webhook };
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      log.error(`❌ [TOOL] configure_webhook failed: ${errorMessage}`);
+      return { success: false, error: errorMessage };
+    }
+  }
+
+  /**
+   * Handle list_webhooks tool
+   *
+   * List all configured webhooks.
+   */
+  async handleListWebhooks(): Promise<ToolResult<{
+    webhooks: WebhookConfig[];
+    stats: WebhookStats;
+  }>> {
+    log.info(`🔧 [TOOL] list_webhooks called`);
+
+    try {
+      const dispatcher = getWebhookDispatcher();
+      const webhooks = dispatcher.listWebhooks();
+      const stats = dispatcher.getStats();
+
+      log.success(`✅ [TOOL] list_webhooks completed (${webhooks.length} webhooks)`);
+      return {
+        success: true,
+        data: { webhooks, stats },
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      log.error(`❌ [TOOL] list_webhooks failed: ${errorMessage}`);
+      return { success: false, error: errorMessage };
+    }
+  }
+
+  /**
+   * Handle test_webhook tool
+   *
+   * Send a test event to a webhook.
+   */
+  async handleTestWebhook(args: { id: string }): Promise<ToolResult<{
+    success: boolean;
+    message: string;
+  }>> {
+    log.info(`🔧 [TOOL] test_webhook called`);
+    log.info(`  ID: ${args.id}`);
+
+    try {
+      const dispatcher = getWebhookDispatcher();
+      const result = await dispatcher.testWebhook(args.id);
+
+      if (result.success) {
+        log.success(`✅ [TOOL] test_webhook succeeded`);
+        return {
+          success: true,
+          data: { success: true, message: "Test event delivered successfully" },
+        };
+      } else {
+        log.warning(`⚠️ [TOOL] test_webhook failed: ${result.error}`);
+        return {
+          success: false,
+          data: { success: false, message: result.error || "Test failed" },
+          error: result.error,
+        };
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      log.error(`❌ [TOOL] test_webhook failed: ${errorMessage}`);
+      return { success: false, error: errorMessage };
+    }
+  }
+
+  /**
+   * Handle remove_webhook tool
+   *
+   * Remove a configured webhook.
+   */
+  async handleRemoveWebhook(args: { id: string }): Promise<ToolResult<{
+    removed: boolean;
+    id: string;
+  }>> {
+    log.info(`🔧 [TOOL] remove_webhook called`);
+    log.info(`  ID: ${args.id}`);
+
+    try {
+      const dispatcher = getWebhookDispatcher();
+      const removed = dispatcher.removeWebhook(args.id);
+
+      if (removed) {
+        log.success(`✅ [TOOL] remove_webhook completed`);
+        return {
+          success: true,
+          data: { removed: true, id: args.id },
+        };
+      } else {
+        log.warning(`⚠️ [TOOL] Webhook not found: ${args.id}`);
+        return {
+          success: false,
+          error: `Webhook not found: ${args.id}`,
+        };
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      log.error(`❌ [TOOL] remove_webhook failed: ${errorMessage}`);
+      return { success: false, error: errorMessage };
     }
   }
 

@@ -4,10 +4,13 @@
  * Manages a persistent library of NotebookLM notebooks.
  * Allows Claude to autonomously add, remove, and switch between
  * multiple notebooks based on the task at hand.
+ *
+ * Supports per-project libraries based on current working directory.
  */
 
 import fs from "fs";
 import path from "path";
+import crypto from "crypto";
 import { CONFIG } from "../config.js";
 import { log } from "../utils/logger.js";
 import { writeFileSecure, PERMISSION_MODES } from "../utils/file-permissions.js";
@@ -17,22 +20,184 @@ import type {
   AddNotebookInput,
   UpdateNotebookInput,
   LibraryStats,
+  ProjectInfo,
 } from "./types.js";
+
+/**
+ * Detect project from current working directory
+ */
+function detectProject(): ProjectInfo | null {
+  const cwd = process.cwd();
+
+  // Priority 1: Git repository root
+  const gitRoot = findGitRoot(cwd);
+  if (gitRoot) {
+    return {
+      id: hashPath(gitRoot),
+      name: path.basename(gitRoot),
+      path: gitRoot,
+      type: "git",
+    };
+  }
+
+  // Priority 2: package.json location
+  const pkgRoot = findPackageJson(cwd);
+  if (pkgRoot) {
+    try {
+      const pkgPath = path.join(pkgRoot, "package.json");
+      const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8"));
+      return {
+        id: hashPath(pkgRoot),
+        name: pkg.name || path.basename(pkgRoot),
+        path: pkgRoot,
+        type: "npm",
+      };
+    } catch {
+      return {
+        id: hashPath(pkgRoot),
+        name: path.basename(pkgRoot),
+        path: pkgRoot,
+        type: "npm",
+      };
+    }
+  }
+
+  // Priority 3: Return null (use global library)
+  // We don't create project libraries for arbitrary directories
+  return null;
+}
+
+/**
+ * Find git repository root by looking for .git directory
+ */
+function findGitRoot(startPath: string): string | null {
+  let currentPath = startPath;
+  const root = path.parse(currentPath).root;
+
+  while (currentPath !== root) {
+    const gitPath = path.join(currentPath, ".git");
+    if (fs.existsSync(gitPath)) {
+      return currentPath;
+    }
+    currentPath = path.dirname(currentPath);
+  }
+
+  return null;
+}
+
+/**
+ * Find package.json location by walking up
+ */
+function findPackageJson(startPath: string): string | null {
+  let currentPath = startPath;
+  const root = path.parse(currentPath).root;
+
+  while (currentPath !== root) {
+    const pkgPath = path.join(currentPath, "package.json");
+    if (fs.existsSync(pkgPath)) {
+      return currentPath;
+    }
+    currentPath = path.dirname(currentPath);
+  }
+
+  return null;
+}
+
+/**
+ * Generate a short hash of a path for project ID
+ */
+function hashPath(filePath: string): string {
+  return crypto
+    .createHash("sha256")
+    .update(filePath)
+    .digest("hex")
+    .substring(0, 12);
+}
 
 export class NotebookLibrary {
   private libraryPath: string;
   private library: Library;
+  private projectInfo: ProjectInfo | null;
+  private useProjectLibrary: boolean;
 
-  constructor() {
-    this.libraryPath = path.join(CONFIG.dataDir, "library.json");
+  constructor(options?: { projectId?: string; useProjectLibrary?: boolean }) {
+    // Determine if we should use per-project libraries
+    this.useProjectLibrary = options?.useProjectLibrary ?? false;
+
+    // Detect or use provided project
+    if (options?.projectId) {
+      // Use provided project ID (for future use)
+      this.projectInfo = null; // Would need lookup
+      this.libraryPath = path.join(
+        CONFIG.dataDir,
+        "projects",
+        options.projectId,
+        "library.json"
+      );
+    } else if (this.useProjectLibrary) {
+      // Auto-detect project from cwd
+      this.projectInfo = detectProject();
+      if (this.projectInfo) {
+        this.libraryPath = path.join(
+          CONFIG.dataDir,
+          "projects",
+          this.projectInfo.id,
+          "library.json"
+        );
+      } else {
+        this.libraryPath = path.join(CONFIG.dataDir, "library.json");
+      }
+    } else {
+      // Use global library
+      this.projectInfo = null;
+      this.libraryPath = path.join(CONFIG.dataDir, "library.json");
+    }
+
+    // Ensure parent directory exists
+    const libraryDir = path.dirname(this.libraryPath);
+    if (!fs.existsSync(libraryDir)) {
+      fs.mkdirSync(libraryDir, { recursive: true, mode: 0o700 });
+    }
+
     this.library = this.loadLibrary();
 
     log.info("📚 NotebookLibrary initialized");
     log.info(`  Library path: ${this.libraryPath}`);
     log.info(`  Notebooks: ${this.library.notebooks.length}`);
+    if (this.projectInfo) {
+      log.info(`  Project: ${this.projectInfo.name} (${this.projectInfo.type})`);
+    }
     if (this.library.active_notebook_id) {
       log.info(`  Active: ${this.library.active_notebook_id}`);
     }
+  }
+
+  /**
+   * Get current project info (if using per-project library)
+   */
+  getProjectInfo(): ProjectInfo | null {
+    return this.projectInfo;
+  }
+
+  /**
+   * Check if using per-project library
+   */
+  isProjectLibrary(): boolean {
+    return this.projectInfo !== null;
+  }
+
+  /**
+   * Get library file path
+   */
+  getLibraryPath(): string {
+    return this.libraryPath;
+  }
+
+  /**
+   * Static method to detect project from current directory
+   */
+  static detectCurrentProject(): ProjectInfo | null {
+    return detectProject();
   }
 
   /**

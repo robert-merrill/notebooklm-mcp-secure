@@ -399,4 +399,11 @@ export class SessionManager {
       total_messages: totalMessages,
     };
   }
+
+  /**
+   * Get the shared context manager (for notebook creation)
+   */
+  getContextManager(): SharedContextManager {
+    return this.sharedContextManager;
+  }
 }

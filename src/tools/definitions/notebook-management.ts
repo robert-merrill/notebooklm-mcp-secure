@@ -248,4 +248,529 @@ User: "Yes" → call remove_notebook`,
       properties: {},
     },
   },
+  {
+    name: "create_notebook",
+    description: `Create a new NotebookLM notebook with sources programmatically.
+
+## What This Tool Does
+- Creates a NEW notebook in your NotebookLM account
+- Uploads sources (URLs, text, files) to the notebook
+- Returns the notebook URL for immediate use
+- Optionally adds to your local library
+
+## Supported Source Types
+- **url**: Web page URL (documentation, articles, etc.)
+- **text**: Raw text content (code, notes, etc.)
+- **file**: Local file path (PDF, DOCX, TXT)
+
+## Example Usage
+
+Create a notebook from API documentation:
+\`\`\`json
+{
+  "name": "React Docs",
+  "sources": [
+    { "type": "url", "value": "https://react.dev/reference/react" }
+  ]
+}
+\`\`\`
+
+Create a notebook with multiple sources:
+\`\`\`json
+{
+  "name": "Security Research",
+  "sources": [
+    { "type": "url", "value": "https://owasp.org/Top10" },
+    { "type": "file", "value": "/path/to/security-report.pdf" },
+    { "type": "text", "value": "Custom notes...", "title": "My Notes" }
+  ],
+  "description": "Security best practices and research",
+  "topics": ["security", "owasp", "best-practices"]
+}
+\`\`\`
+
+## NotebookLM Limits (Free Tier)
+- 100 notebooks maximum
+- 50 sources per notebook
+- 500k words per source
+- 50 queries per day
+
+## Notes
+- Requires authentication (run setup_auth first)
+- Creates notebook with sharing set to private by default
+- Large files may take longer to process`,
+    inputSchema: {
+      type: "object",
+      properties: {
+        name: {
+          type: "string",
+          description: "Display name for the new notebook",
+        },
+        sources: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              type: {
+                type: "string",
+                enum: ["url", "text", "file"],
+                description: "Source type: url, text, or file",
+              },
+              value: {
+                type: "string",
+                description: "URL, text content, or file path depending on type",
+              },
+              title: {
+                type: "string",
+                description: "Optional title for text sources",
+              },
+            },
+            required: ["type", "value"],
+          },
+          description: "Array of sources to add to the notebook",
+        },
+        description: {
+          type: "string",
+          description: "Optional description for the notebook in your library",
+        },
+        topics: {
+          type: "array",
+          items: { type: "string" },
+          description: "Optional topics for categorization in your library",
+        },
+        auto_add_to_library: {
+          type: "boolean",
+          description: "Whether to automatically add the created notebook to your library (default: true)",
+        },
+        browser_options: {
+          type: "object",
+          properties: {
+            headless: {
+              type: "boolean",
+              description: "Run browser in headless mode (default: true)",
+            },
+            show: {
+              type: "boolean",
+              description: "Show browser window for debugging",
+            },
+            timeout_ms: {
+              type: "number",
+              description: "Timeout in milliseconds (default: 30000)",
+            },
+          },
+          description: "Optional browser settings for debugging",
+        },
+        show_browser: {
+          type: "boolean",
+          description: "Show browser window (shorthand for browser_options.show)",
+        },
+      },
+      required: ["name", "sources"],
+    },
+  },
+  {
+    name: "sync_library",
+    description: `Sync your local library with actual NotebookLM notebooks.
+
+## What This Tool Does
+- Navigates to NotebookLM and extracts all your notebooks
+- Compares with local library entries
+- Detects stale entries (notebooks deleted or URLs changed)
+- Identifies notebooks not in your library
+- Optionally auto-removes stale entries
+
+## When To Use
+- Library seems out of sync with NotebookLM
+- After deleting notebooks in NotebookLM
+- To discover new notebooks to add
+- Before setting up automation workflows
+
+## Output
+Returns a sync report with:
+- **matched**: Library entries that match actual notebooks
+- **staleEntries**: Library entries with no matching notebook (candidates for removal)
+- **missingNotebooks**: NotebookLM notebooks not in library (candidates for adding)
+- **suggestions**: Recommended actions
+
+## Example Usage
+\`\`\`json
+{ "auto_fix": false }
+\`\`\`
+
+With auto-fix to remove stale entries:
+\`\`\`json
+{ "auto_fix": true }
+\`\`\``,
+    inputSchema: {
+      type: "object",
+      properties: {
+        auto_fix: {
+          type: "boolean",
+          description: "Automatically remove stale library entries (default: false)",
+        },
+        show_browser: {
+          type: "boolean",
+          description: "Show browser window for debugging",
+        },
+      },
+    },
+  },
+  {
+    name: "list_sources",
+    description: `List all sources in a NotebookLM notebook.
+
+## Returns
+Array of sources with:
+- id: Source identifier (for use with remove_source)
+- title: Source name/title
+- type: url, text, file, drive, or unknown
+- status: ready, processing, or failed
+
+## Example
+\`\`\`json
+{ "notebook_id": "my-notebook" }
+\`\`\`
+
+Or with direct URL:
+\`\`\`json
+{ "notebook_url": "https://notebooklm.google.com/notebook/xxx" }
+\`\`\``,
+    inputSchema: {
+      type: "object",
+      properties: {
+        notebook_id: {
+          type: "string",
+          description: "Library notebook ID",
+        },
+        notebook_url: {
+          type: "string",
+          description: "Direct notebook URL (overrides notebook_id)",
+        },
+      },
+    },
+  },
+  {
+    name: "add_source",
+    description: `Add a source to an existing NotebookLM notebook.
+
+## Source Types
+- **url**: Web page URL
+- **text**: Text content (paste)
+- **file**: Local file path (PDF, DOCX, TXT)
+
+## Example
+\`\`\`json
+{
+  "notebook_id": "my-notebook",
+  "source": {
+    "type": "url",
+    "value": "https://docs.example.com/api"
+  }
+}
+\`\`\``,
+    inputSchema: {
+      type: "object",
+      properties: {
+        notebook_id: {
+          type: "string",
+          description: "Library notebook ID",
+        },
+        notebook_url: {
+          type: "string",
+          description: "Direct notebook URL (overrides notebook_id)",
+        },
+        source: {
+          type: "object",
+          properties: {
+            type: {
+              type: "string",
+              enum: ["url", "text", "file"],
+              description: "Source type",
+            },
+            value: {
+              type: "string",
+              description: "URL, text content, or file path",
+            },
+            title: {
+              type: "string",
+              description: "Optional title for text sources",
+            },
+          },
+          required: ["type", "value"],
+        },
+      },
+      required: ["source"],
+    },
+  },
+  {
+    name: "remove_source",
+    description: `Remove a source from a NotebookLM notebook.
+
+## Usage
+1. First call list_sources to get source IDs
+2. Then call remove_source with the source ID
+
+## Example
+\`\`\`json
+{
+  "notebook_id": "my-notebook",
+  "source_id": "source-0"
+}
+\`\`\``,
+    inputSchema: {
+      type: "object",
+      properties: {
+        notebook_id: {
+          type: "string",
+          description: "Library notebook ID",
+        },
+        notebook_url: {
+          type: "string",
+          description: "Direct notebook URL (overrides notebook_id)",
+        },
+        source_id: {
+          type: "string",
+          description: "Source ID from list_sources (e.g., 'source-0')",
+        },
+      },
+      required: ["source_id"],
+    },
+  },
+  {
+    name: "export_library",
+    description: `Export your notebook library to a backup file.
+
+## Formats
+- **json**: Full backup with all metadata (recommended for restore)
+- **csv**: Simple list for spreadsheets (name, url, topics, last_used)
+
+## Default Location
+If no output_path specified, saves to:
+~/notebooklm-library-backup-{date}.{format}
+
+## Example Usage
+\`\`\`json
+{ "format": "json" }
+\`\`\`
+
+Export to specific location:
+\`\`\`json
+{ "format": "csv", "output_path": "/path/to/backup.csv" }
+\`\`\``,
+    inputSchema: {
+      type: "object",
+      properties: {
+        format: {
+          type: "string",
+          enum: ["json", "csv"],
+          description: "Export format (default: json)",
+        },
+        output_path: {
+          type: "string",
+          description: "Output file path (optional, defaults to home directory)",
+        },
+      },
+    },
+  },
+  {
+    name: "batch_create_notebooks",
+    description: `Create multiple NotebookLM notebooks in one operation.
+
+## What This Tool Does
+- Creates up to 10 notebooks in a single batch operation
+- Reports progress for each notebook
+- Optionally continues on error or stops on first failure
+- Auto-adds created notebooks to your library
+
+## Example Usage
+\`\`\`json
+{
+  "notebooks": [
+    {
+      "name": "React Documentation",
+      "sources": [
+        { "type": "url", "value": "https://react.dev/reference" }
+      ],
+      "topics": ["react", "frontend"]
+    },
+    {
+      "name": "Node.js API",
+      "sources": [
+        { "type": "url", "value": "https://nodejs.org/api/" }
+      ],
+      "topics": ["nodejs", "backend"]
+    }
+  ],
+  "stop_on_error": false
+}
+\`\`\`
+
+## Limits
+- Maximum 10 notebooks per batch
+- Each notebook follows individual source limits (50-600 based on tier)
+- Delays between notebooks to avoid rate limiting
+
+## Returns
+Summary with:
+- total: Number of notebooks attempted
+- succeeded: Successfully created count
+- failed: Failed count
+- results: Array of individual results`,
+    inputSchema: {
+      type: "object",
+      properties: {
+        notebooks: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              name: {
+                type: "string",
+                description: "Display name for the notebook",
+              },
+              sources: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    type: {
+                      type: "string",
+                      enum: ["url", "text", "file"],
+                      description: "Source type",
+                    },
+                    value: {
+                      type: "string",
+                      description: "URL, text content, or file path",
+                    },
+                    title: {
+                      type: "string",
+                      description: "Optional title for text sources",
+                    },
+                  },
+                  required: ["type", "value"],
+                },
+                description: "Sources to add to this notebook",
+              },
+              description: {
+                type: "string",
+                description: "Optional description for the notebook",
+              },
+              topics: {
+                type: "array",
+                items: { type: "string" },
+                description: "Optional topics for categorization",
+              },
+            },
+            required: ["name", "sources"],
+          },
+          maxItems: 10,
+          description: "Array of notebooks to create (max 10)",
+        },
+        stop_on_error: {
+          type: "boolean",
+          description: "Stop batch if any notebook fails (default: false)",
+        },
+        show_browser: {
+          type: "boolean",
+          description: "Show browser window for debugging",
+        },
+      },
+      required: ["notebooks"],
+    },
+  },
+  {
+    name: "generate_audio_overview",
+    description: `Generate an AI-powered audio overview (podcast-style) for a notebook.
+
+## What This Tool Does
+- Triggers NotebookLM's audio overview generation
+- Audio overviews are ~5-15 minute podcast-style summaries
+- Generation takes 2-5 minutes typically
+- Returns immediately with status (check with get_audio_status)
+
+## Requirements
+- Notebook must have at least one source
+- Audio generation may not be available on all notebooks
+
+## Example
+\`\`\`json
+{ "notebook_id": "my-research" }
+\`\`\``,
+    inputSchema: {
+      type: "object",
+      properties: {
+        notebook_id: {
+          type: "string",
+          description: "Library notebook ID",
+        },
+        notebook_url: {
+          type: "string",
+          description: "Or direct notebook URL (overrides notebook_id)",
+        },
+      },
+    },
+  },
+  {
+    name: "get_audio_status",
+    description: `Check the audio overview generation status for a notebook.
+
+## Returns
+- status: "not_started" | "generating" | "ready" | "failed" | "unknown"
+- progress: Generation progress (0-100) if generating
+- duration: Audio duration in seconds if ready
+
+## Example
+\`\`\`json
+{ "notebook_id": "my-research" }
+\`\`\``,
+    inputSchema: {
+      type: "object",
+      properties: {
+        notebook_id: {
+          type: "string",
+          description: "Library notebook ID",
+        },
+        notebook_url: {
+          type: "string",
+          description: "Or direct notebook URL (overrides notebook_id)",
+        },
+      },
+    },
+  },
+  {
+    name: "download_audio",
+    description: `Download the generated audio overview file.
+
+## Requirements
+- Audio must be in "ready" status
+- Use get_audio_status to check before downloading
+
+## Output
+Downloads to specified path or ~/notebooklm-audio-{timestamp}.mp3
+
+## Example
+\`\`\`json
+{
+  "notebook_id": "my-research",
+  "output_path": "/path/to/save/podcast.mp3"
+}
+\`\`\``,
+    inputSchema: {
+      type: "object",
+      properties: {
+        notebook_id: {
+          type: "string",
+          description: "Library notebook ID",
+        },
+        notebook_url: {
+          type: "string",
+          description: "Or direct notebook URL (overrides notebook_id)",
+        },
+        output_path: {
+          type: "string",
+          description: "Optional output file path",
+        },
+      },
+    },
+  },
 ];
