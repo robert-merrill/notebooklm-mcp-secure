@@ -77,6 +77,12 @@ export interface Config {
   cleanupInstancesOnShutdown: boolean;
   instanceProfileTtlHours: number;
   instanceProfileMaxCount: number;
+
+  // Gemini API (optional - for Deep Research and quick queries)
+  geminiApiKey: string | null;
+  geminiDefaultModel: string;
+  geminiDeepResearchEnabled: boolean;
+  geminiTimeoutMs: number;
 }
 
 /**
@@ -131,6 +137,12 @@ const DEFAULTS: Config = {
   cleanupInstancesOnShutdown: true,
   instanceProfileTtlHours: 72,
   instanceProfileMaxCount: 20,
+
+  // Gemini API defaults
+  geminiApiKey: null,
+  geminiDefaultModel: "gemini-2.5-flash",
+  geminiDeepResearchEnabled: true,
+  geminiTimeoutMs: 30000,
 };
 
 
@@ -196,6 +208,12 @@ function applyEnvOverrides(config: Config): Config {
     cleanupInstancesOnShutdown: parseBoolean(process.env.NOTEBOOK_CLEANUP_ON_SHUTDOWN, config.cleanupInstancesOnShutdown),
     instanceProfileTtlHours: parseInteger(process.env.NOTEBOOK_INSTANCE_TTL_HOURS, config.instanceProfileTtlHours),
     instanceProfileMaxCount: parseInteger(process.env.NOTEBOOK_INSTANCE_MAX_COUNT, config.instanceProfileMaxCount),
+
+    // Gemini API
+    geminiApiKey: process.env.GEMINI_API_KEY || config.geminiApiKey,
+    geminiDefaultModel: process.env.GEMINI_DEFAULT_MODEL || config.geminiDefaultModel,
+    geminiDeepResearchEnabled: parseBoolean(process.env.GEMINI_DEEP_RESEARCH_ENABLED, config.geminiDeepResearchEnabled),
+    geminiTimeoutMs: parseInteger(process.env.GEMINI_TIMEOUT_MS, config.geminiTimeoutMs),
   };
 }
 

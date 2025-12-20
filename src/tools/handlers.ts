@@ -36,6 +36,14 @@ import type { CreateNotebookInput, CreatedNotebook, NotebookSource } from "../no
 import { getWebhookDispatcher, type WebhookConfig, type WebhookStats } from "../webhooks/index.js";
 import type { EventType } from "../events/event-types.js";
 import { getQuotaManager } from "../quota/index.js";
+import {
+  GeminiClient,
+  type GeminiInteraction,
+  type DeepResearchResult,
+  type GeminiQueryResult,
+  type GeminiTool,
+  type GeminiModel,
+} from "../gemini/index.js";
 
 const FOLLOW_UP_REMINDER =
   "\n\nEXTREMELY IMPORTANT: Is that ALL you need to know? You can always ask another question using the same session ID! Think about it carefully: before you reply to the user, review their original request and this answer. If anything is still unclear or missing, ask me another question first.";
@@ -48,6 +56,7 @@ export class ToolHandlers {
   private authManager: AuthManager;
   private library: NotebookLibrary;
   private rateLimiter: RateLimiter;
+  private geminiClient: GeminiClient;
 
   constructor(sessionManager: SessionManager, authManager: AuthManager, library: NotebookLibrary) {
     this.sessionManager = sessionManager;
@@ -55,6 +64,8 @@ export class ToolHandlers {
     this.library = library;
     // Rate limit: 100 requests per minute per session (protective limit)
     this.rateLimiter = new RateLimiter(100, 60000);
+    // Initialize Gemini client (may be unavailable if no API key)
+    this.geminiClient = new GeminiClient();
   }
 
   /**
@@ -2111,6 +2122,230 @@ export class ToolHandlers {
       return { success: false, error: errorMessage };
     }
   }
+
+  // ==================== GEMINI API HANDLERS ====================
+
+  /**
+   * Handle deep_research tool
+   *
+   * Performs comprehensive research using Gemini's Deep Research agent.
+   */
+  async handleDeepResearch(
+    args: {
+      query: string;
+      wait_for_completion?: boolean;
+      max_wait_seconds?: number;
+    },
+    sendProgress?: ProgressCallback
+  ): Promise<ToolResult<DeepResearchResult>> {
+    const startTime = Date.now();
+    log.info(`🔧 [TOOL] deep_research called`);
+    log.info(`  Query: "${sanitizeForLogging(args.query.substring(0, 100))}"...`);
+
+    // Check if Gemini is available
+    if (!this.geminiClient.isAvailable()) {
+      log.error(`❌ [TOOL] deep_research failed: Gemini API key not configured`);
+      return {
+        success: false,
+        error: "Gemini API key not configured. Set GEMINI_API_KEY environment variable.",
+      };
+    }
+
+    try {
+      // Validate query
+      if (!args.query || args.query.trim().length === 0) {
+        throw new Error("Query cannot be empty");
+      }
+      if (args.query.length > 10000) {
+        throw new Error("Query too long (max 10000 characters)");
+      }
+
+      // Validate max_wait_seconds
+      const maxWaitSeconds = Math.min(args.max_wait_seconds || 300, 600); // Max 10 minutes
+      const maxWaitMs = maxWaitSeconds * 1000;
+
+      if (sendProgress) {
+        await sendProgress("Starting deep research...", 0, 100);
+      }
+
+      // Start the research
+      const interaction = await this.geminiClient.deepResearch({
+        query: args.query,
+        background: true,
+        waitForCompletion: args.wait_for_completion !== false,
+        maxWaitMs,
+        progressCallback: sendProgress,
+      });
+
+      const durationMs = Date.now() - startTime;
+
+      // Extract the answer
+      const answer = interaction.outputs.find(o => o.type === "text")?.text || "";
+
+      // Audit log
+      await audit.tool("deep_research", { query: sanitizeForLogging(args.query) }, true, durationMs);
+
+      log.success(`✅ [TOOL] deep_research completed in ${durationMs}ms`);
+
+      return {
+        success: true,
+        data: {
+          interactionId: interaction.id,
+          status: interaction.status,
+          answer,
+          tokensUsed: interaction.usage?.totalTokens,
+          durationMs,
+        },
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const durationMs = Date.now() - startTime;
+      log.error(`❌ [TOOL] deep_research failed: ${errorMessage}`);
+      await audit.tool("deep_research", { query: sanitizeForLogging(args.query) }, false, durationMs, errorMessage);
+      return { success: false, error: errorMessage };
+    }
+  }
+
+  /**
+   * Handle gemini_query tool
+   *
+   * Quick query to Gemini model with optional grounding tools.
+   */
+  async handleGeminiQuery(args: {
+    query: string;
+    model?: GeminiModel;
+    tools?: GeminiTool[];
+    urls?: string[];
+    previous_interaction_id?: string;
+  }): Promise<ToolResult<GeminiQueryResult>> {
+    const startTime = Date.now();
+    log.info(`🔧 [TOOL] gemini_query called`);
+    log.info(`  Query: "${sanitizeForLogging(args.query.substring(0, 100))}"...`);
+    log.info(`  Model: ${args.model || "default"}`);
+    if (args.tools) log.info(`  Tools: ${args.tools.join(", ")}`);
+
+    // Check if Gemini is available
+    if (!this.geminiClient.isAvailable()) {
+      log.error(`❌ [TOOL] gemini_query failed: Gemini API key not configured`);
+      return {
+        success: false,
+        error: "Gemini API key not configured. Set GEMINI_API_KEY environment variable.",
+      };
+    }
+
+    try {
+      // Validate query
+      if (!args.query || args.query.trim().length === 0) {
+        throw new Error("Query cannot be empty");
+      }
+      if (args.query.length > 30000) {
+        throw new Error("Query too long (max 30000 characters)");
+      }
+
+      // If URLs provided, auto-enable url_context
+      let tools = args.tools || [];
+      if (args.urls && args.urls.length > 0 && !tools.includes("url_context")) {
+        tools = [...tools, "url_context"];
+      }
+
+      // Validate URLs if provided
+      if (args.urls) {
+        for (const url of args.urls) {
+          if (!url.startsWith("http://") && !url.startsWith("https://")) {
+            throw new Error(`Invalid URL: ${url} (must start with http:// or https://)`);
+          }
+        }
+      }
+
+      const interaction = await this.geminiClient.query({
+        query: args.query,
+        model: args.model,
+        tools,
+        urls: args.urls,
+        previousInteractionId: args.previous_interaction_id,
+      });
+
+      const durationMs = Date.now() - startTime;
+
+      // Extract the answer
+      const answer = interaction.outputs.find(o => o.type === "text")?.text || "";
+
+      // Identify which tools were used
+      const toolsUsed = interaction.outputs
+        .filter(o => o.type === "function_call")
+        .map(o => o.name)
+        .filter((name): name is string => !!name);
+
+      // Audit log
+      await audit.tool("gemini_query", {
+        query: sanitizeForLogging(args.query),
+        model: args.model,
+        tools: args.tools,
+      }, true, durationMs);
+
+      log.success(`✅ [TOOL] gemini_query completed in ${durationMs}ms`);
+
+      return {
+        success: true,
+        data: {
+          interactionId: interaction.id,
+          answer,
+          model: interaction.model || args.model || CONFIG.geminiDefaultModel,
+          tokensUsed: interaction.usage?.totalTokens,
+          toolsUsed: toolsUsed.length > 0 ? toolsUsed : undefined,
+        },
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const durationMs = Date.now() - startTime;
+      log.error(`❌ [TOOL] gemini_query failed: ${errorMessage}`);
+      await audit.tool("gemini_query", { query: sanitizeForLogging(args.query) }, false, durationMs, errorMessage);
+      return { success: false, error: errorMessage };
+    }
+  }
+
+  /**
+   * Handle get_research_status tool
+   *
+   * Check the status of a background deep research task.
+   */
+  async handleGetResearchStatus(args: {
+    interaction_id: string;
+  }): Promise<ToolResult<GeminiInteraction>> {
+    log.info(`🔧 [TOOL] get_research_status called`);
+    log.info(`  Interaction ID: ${args.interaction_id}`);
+
+    // Check if Gemini is available
+    if (!this.geminiClient.isAvailable()) {
+      log.error(`❌ [TOOL] get_research_status failed: Gemini API key not configured`);
+      return {
+        success: false,
+        error: "Gemini API key not configured. Set GEMINI_API_KEY environment variable.",
+      };
+    }
+
+    try {
+      // Validate interaction_id
+      if (!args.interaction_id || args.interaction_id.trim().length === 0) {
+        throw new Error("Interaction ID cannot be empty");
+      }
+
+      const interaction = await this.geminiClient.getInteraction(args.interaction_id);
+
+      log.success(`✅ [TOOL] get_research_status: ${interaction.status}`);
+
+      return {
+        success: true,
+        data: interaction,
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      log.error(`❌ [TOOL] get_research_status failed: ${errorMessage}`);
+      return { success: false, error: errorMessage };
+    }
+  }
+
+  // ==================== CLEANUP ====================
 
   /**
    * Cleanup all resources (called on server shutdown)

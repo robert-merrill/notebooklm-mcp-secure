@@ -81,7 +81,6 @@ class NotebookLMMCPServer {
         capabilities: {
           tools: {},
           resources: {},
-          resourceTemplates: {},
           prompts: {}, // Required for completion/complete support in some clients
           logging: {},
         },
@@ -420,6 +419,35 @@ class NotebookLMMCPServer {
           case "remove_webhook":
             result = await this.toolHandlers.handleRemoveWebhook(
               args as { id: string }
+            );
+            break;
+
+          // Gemini API tools
+          case "deep_research":
+            result = await this.toolHandlers.handleDeepResearch(
+              args as {
+                query: string;
+                wait_for_completion?: boolean;
+                max_wait_seconds?: number;
+              },
+              sendProgress
+            );
+            break;
+
+          case "gemini_query":
+            // Type assertion for Gemini-specific types
+            result = await this.toolHandlers.handleGeminiQuery({
+              query: (args as { query: string }).query,
+              model: (args as { model?: string }).model as import("./gemini/types.js").GeminiModel | undefined,
+              tools: (args as { tools?: string[] }).tools as import("./gemini/types.js").GeminiTool[] | undefined,
+              urls: (args as { urls?: string[] }).urls,
+              previous_interaction_id: (args as { previous_interaction_id?: string }).previous_interaction_id,
+            });
+            break;
+
+          case "get_research_status":
+            result = await this.toolHandlers.handleGetResearchStatus(
+              args as { interaction_id: string }
             );
             break;
 
