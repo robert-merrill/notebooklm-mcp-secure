@@ -11,10 +11,11 @@
 [![Security](https://img.shields.io/badge/Security-14%20Layers-red.svg)](./SECURITY.md)
 [![Post-Quantum](https://img.shields.io/badge/Encryption-Post--Quantum-purple.svg)](./SECURITY.md#post-quantum-encryption)
 [![Gemini](https://img.shields.io/badge/Gemini-Deep%20Research-4285F4.svg)](#-gemini-deep-research-v180)
+[![Notebooks](https://img.shields.io/badge/Notebooks-Create%20%26%20Manage-orange.svg)](#programmatic-notebook-creation-v170)
 [![Compliance](https://img.shields.io/badge/Compliance-GDPR%20%7C%20SOC2%20%7C%20CSSF-blue.svg)](./docs/COMPLIANCE-SPEC.md)
 [![Tests](https://img.shields.io/badge/Tests-111%20Passing-brightgreen.svg)](./tests/)
 
-[**NEW: Gemini Deep Research**](#-gemini-deep-research-v180) • [Security Features](#security-features) • [Compliance](#enterprise-compliance-v160) • [Installation](#installation) • [Quick Start](#quick-start)
+[**Gemini Deep Research**](#-gemini-deep-research-v180) • [**Notebook Creation**](#programmatic-notebook-creation-v170) • [Security](#security-features) • [Compliance](#enterprise-compliance-v160) • [Install](#installation)
 
 </div>
 
@@ -76,32 +77,35 @@ Run deep research in the background and check progress:
 ### Hybrid Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                        NotebookLM MCP Server v1.8.0                     │
-├─────────────────────────────────────────────────────────────────────────┤
-│                                                                         │
-│  ┌─────────────────────────┐       ┌─────────────────────────────────┐  │
-│  │   BROWSER AUTOMATION    │       │        GEMINI API               │  │
-│  │   (Your Documents)      │       │        (Web Research)           │  │
-│  ├─────────────────────────┤       ├─────────────────────────────────┤  │
-│  │                         │       │                                 │  │
-│  │  • ask_question         │       │  • deep_research          NEW   │  │
-│  │  • add_notebook         │       │  • gemini_query           NEW   │  │
-│  │  • list_notebooks       │       │  • get_research_status    NEW   │  │
-│  │  • manage_sources       │       │                                 │  │
-│  │  • generate_audio       │       │  Powered by:                    │  │
-│  │                         │       │  • Deep Research Agent          │  │
-│  │  Grounded on:           │       │  • Google Search                │  │
-│  │  YOUR uploaded docs     │       │  • Code Execution               │  │
-│  │                         │       │  • URL Analysis                 │  │
-│  └─────────────────────────┘       └─────────────────────────────────┘  │
-│                                                                         │
-│                    ┌───────────────────────────────┐                    │
-│                    │     14 SECURITY LAYERS        │                    │
-│                    │  Post-Quantum • Audit Logs    │                    │
-│                    │  Cert Pinning • Memory Wipe   │                    │
-│                    └───────────────────────────────┘                    │
-└─────────────────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                         NotebookLM MCP Server v1.8.0                         │
+├──────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ┌────────────────────────────────┐    ┌──────────────────────────────────┐  │
+│  │      BROWSER AUTOMATION        │    │          GEMINI API              │  │
+│  │      (Your Documents)          │    │          (Web Research)          │  │
+│  ├────────────────────────────────┤    ├──────────────────────────────────┤  │
+│  │                                │    │                                  │  │
+│  │  QUERY                         │    │  • deep_research           v1.8  │  │
+│  │  • ask_question                │    │  • gemini_query            v1.8  │  │
+│  │                                │    │  • get_research_status     v1.8  │  │
+│  │  CREATE & MANAGE         v1.7  │    │                                  │  │
+│  │  • create_notebook             │    │  Powered by:                     │  │
+│  │  • batch_create_notebooks      │    │  ✦ Deep Research Agent           │  │
+│  │  • manage_sources              │    │  ✦ Google Search Grounding       │  │
+│  │  • generate_audio              │    │  ✦ Code Execution                │  │
+│  │  • sync_notebook               │    │  ✦ URL Analysis                  │  │
+│  │                                │    │                                  │  │
+│  │  Grounded on YOUR docs         │    │  Grounded on the WEB             │  │
+│  └────────────────────────────────┘    └──────────────────────────────────┘  │
+│                                                                              │
+│                      ┌─────────────────────────────────┐                     │
+│                      │       14 SECURITY LAYERS        │                     │
+│                      │   Post-Quantum • Audit Logs     │                     │
+│                      │   Cert Pinning • Memory Wipe    │                     │
+│                      │   GDPR • SOC2 • CSSF Ready      │                     │
+│                      └─────────────────────────────────┘                     │
+└──────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ### Gemini Configuration
@@ -125,6 +129,98 @@ GEMINI_TIMEOUT_MS=30000                  # API timeout
 | Current events / recent info | `gemini_query` + google_search | Live web data |
 | Code calculations | `gemini_query` + code_execution | Reliable computation |
 | Analyze a webpage | `gemini_query` + url_context | Direct page analysis |
+
+---
+
+## Programmatic Notebook Creation (v1.7.0+)
+
+**Create NotebookLM notebooks entirely from code — no manual clicks required.**
+
+Most MCP servers can only *read* from NotebookLM. This one can **create notebooks, add sources, and generate audio** — all programmatically.
+
+### `create_notebook` — Build Notebooks Instantly
+
+Create a complete notebook with multiple sources in one command:
+
+```json
+{
+  "name": "Security Research 2025",
+  "sources": [
+    { "type": "url", "value": "https://owasp.org/Top10" },
+    { "type": "file", "value": "/path/to/security-report.pdf" },
+    { "type": "text", "value": "Custom analysis notes...", "title": "My Notes" }
+  ],
+  "description": "OWASP security best practices",
+  "topics": ["security", "owasp", "vulnerabilities"]
+}
+```
+
+**Supported source types:**
+- **URL** — Web pages, documentation, articles
+- **File** — PDF, DOCX, TXT, and more
+- **Text** — Raw text, code snippets, notes
+
+### `batch_create_notebooks` — Scale Up
+
+Create **up to 10 notebooks** in a single operation:
+
+```json
+{
+  "notebooks": [
+    { "name": "React Docs", "sources": [{ "type": "url", "value": "https://react.dev/reference" }] },
+    { "name": "Node.js API", "sources": [{ "type": "url", "value": "https://nodejs.org/api/" }] },
+    { "name": "TypeScript Handbook", "sources": [{ "type": "url", "value": "https://www.typescriptlang.org/docs/" }] }
+  ]
+}
+```
+
+Perfect for:
+- Setting up project documentation libraries
+- Onboarding new team members with curated knowledge bases
+- Creating topic-specific research notebooks in bulk
+
+### `manage_sources` — Dynamic Source Management
+
+Add or remove sources from existing notebooks:
+
+```json
+{
+  "notebook_id": "abc123",
+  "action": "add",
+  "sources": [{ "type": "url", "value": "https://new-documentation.com" }]
+}
+```
+
+### `generate_audio` — Audio Overview Creation
+
+Generate NotebookLM's famous "Audio Overview" podcasts programmatically:
+
+```
+"Generate an audio overview for my Security Research notebook"
+```
+
+### `sync_notebook` — Keep Sources Updated
+
+Sync notebook sources from a local directory:
+
+```json
+{
+  "notebook_id": "abc123",
+  "directory": "/path/to/docs",
+  "patterns": ["*.md", "*.pdf"]
+}
+```
+
+### Why This Matters
+
+| Traditional Workflow | With This MCP |
+|---------------------|---------------|
+| Manually create notebook in browser | `create_notebook` → done |
+| Click "Add source" for each document | Batch add in single command |
+| Navigate UI to generate audio | `generate_audio` → podcast ready |
+| Update sources by hand | `sync_notebook` from local files |
+
+**Your agent can now build entire knowledge bases autonomously.**
 
 ---
 
@@ -420,10 +516,13 @@ Or integrate in CI/CD:
 | Zero-hallucination Q&A | ✅ | ✅ |
 | Library management | ✅ | ✅ |
 | Multi-client support | ✅ | ✅ |
+| **Create Notebooks Programmatically** | ❌ | ✅ **UNIQUE** |
+| **Batch Create (10 notebooks at once)** | ❌ | ✅ **UNIQUE** |
 | **Gemini Deep Research** | ❌ | ✅ **NEW** |
 | **Gemini Query with Grounding** | ❌ | ✅ **NEW** |
-| **Source Management** | ❌ | ✅ |
+| **Source Management (add/remove)** | ❌ | ✅ |
 | **Audio Overview Generation** | ❌ | ✅ |
+| **Sync from Local Directories** | ❌ | ✅ |
 | **Cross-platform (Linux/macOS/Windows)** | ⚠️ | ✅ |
 | **Post-quantum encryption** | ❌ | ✅ |
 | **Secrets scanning** | ❌ | ✅ |
