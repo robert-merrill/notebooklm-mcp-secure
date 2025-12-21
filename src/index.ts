@@ -81,7 +81,8 @@ class NotebookLMMCPServer {
         capabilities: {
           tools: {},
           resources: {},
-          prompts: {}, // Required for completion/complete support in some clients
+          prompts: {},
+          completions: {}, // Required for completion/complete handler
           logging: {},
         },
       }
