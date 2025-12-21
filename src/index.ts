@@ -482,6 +482,13 @@ class NotebookLMMCPServer {
             );
             break;
 
+          // Chunked document tools (v1.10.0)
+          case "query_chunked_document":
+            result = await this.toolHandlers.handleQueryChunkedDocument(
+              args as { file_names: string[]; query: string; model?: string }
+            );
+            break;
+
           default:
             log.error(`❌ [MCP] Unknown tool: ${name}`);
             return {

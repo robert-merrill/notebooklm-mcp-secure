@@ -146,8 +146,14 @@ const uploadDocumentTool: Tool = {
 - File is retained for 48 hours
 - Returns a file ID for use with query_document
 
+## Auto-Chunking for Large PDFs (v1.10.0)
+- PDFs over 50MB or 1000 pages are automatically split into chunks
+- Each chunk is uploaded separately and tracked
+- Use query_chunked_document or pass all chunk IDs to query_document
+- Returns wasChunked=true and allFileNames array when chunked
+
 ## Supported File Types
-- PDF (up to 50MB, 1000 pages)
+- PDF (any size - auto-chunked if needed)
 - TXT, MD, HTML, CSV, JSON, XML
 - DOCX, DOC
 - Images (PNG, JPG, GIF, WebP)
@@ -295,6 +301,62 @@ const deleteDocumentTool: Tool = {
 };
 
 /**
+ * Query Chunked Document tool - query a large document that was split into chunks
+ */
+const queryChunkedDocumentTool: Tool = {
+  name: "query_chunked_document",
+  description: `Query a large document that was automatically chunked during upload.
+
+## What This Does
+- Queries each chunk of a large document
+- Aggregates results into a single coherent answer
+- Handles documents of any size (1000+ pages)
+
+## When to Use
+- After upload_document returns wasChunked=true
+- When you have multiple chunk file IDs to query together
+- For comprehensive analysis of large PDFs
+
+## How It Works
+1. Queries each chunk with your question
+2. Collects answers from all chunks
+3. Uses Gemini to synthesize a unified response
+4. Returns aggregated answer with all sources
+
+## Example
+If upload_document returned:
+  { wasChunked: true, allFileNames: ["files/a", "files/b", "files/c"] }
+
+Call this tool with:
+  { file_names: ["files/a", "files/b", "files/c"], query: "What are the main findings?" }
+
+## Requirements
+- GEMINI_API_KEY environment variable must be set
+- Document chunks must be uploaded first`,
+  inputSchema: {
+    type: "object",
+    properties: {
+      file_names: {
+        type: "array",
+        items: { type: "string" },
+        description: "Array of chunk file IDs (from upload_document's allFileNames)",
+      },
+      query: {
+        type: "string",
+        description: "Question to ask about the document",
+      },
+      model: {
+        type: "string",
+        enum: ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-3-flash-preview"],
+        default: "gemini-2.5-flash",
+        description: "Model to use for querying and aggregation",
+      },
+    },
+    required: ["file_names", "query"],
+  },
+};
+
+/**
  * All Gemini tools
  */
 export const geminiTools: Tool[] = [
@@ -307,4 +369,6 @@ export const geminiTools: Tool[] = [
   queryDocumentTool,
   listDocumentsTool,
   deleteDocumentTool,
+  // Chunked document tools (v1.10.0)
+  queryChunkedDocumentTool,
 ];

@@ -209,6 +209,47 @@ Immediately remove files (don't wait for 48h expiration).
    → File removed
 ```
 
+### Auto-Chunking for Large PDFs (v1.10.0)
+
+**No file size limits** — PDFs of any size are automatically handled.
+
+When you upload a PDF that exceeds Gemini's limits (50MB or 1000 pages), the system automatically:
+
+1. **Detects** the oversized PDF
+2. **Splits** it into optimal chunks (500 pages each)
+3. **Uploads** all chunks in parallel
+4. **Returns** chunk metadata for querying
+
+```
+upload_document("/research/massive-2000-page-report.pdf")
+
+→ Returns:
+{
+  "wasChunked": true,
+  "totalPages": 2000,
+  "chunks": [
+    { "fileName": "files/abc1", "pageStart": 1, "pageEnd": 500 },
+    { "fileName": "files/abc2", "pageStart": 501, "pageEnd": 1000 },
+    { "fileName": "files/abc3", "pageStart": 1001, "pageEnd": 1500 },
+    { "fileName": "files/abc4", "pageStart": 1501, "pageEnd": 2000 }
+  ],
+  "allFileNames": ["files/abc1", "files/abc2", "files/abc3", "files/abc4"]
+}
+```
+
+#### `query_chunked_document` — Query All Chunks at Once
+
+For chunked documents, use this tool to query all parts and get an aggregated answer:
+
+```
+query_chunked_document(
+  file_names: ["files/abc1", "files/abc2", "files/abc3", "files/abc4"],
+  query: "What are the key recommendations in this report?"
+)
+
+→ Queries each chunk, then synthesizes a unified answer
+```
+
 ### When to Use Document API vs NotebookLM
 
 | Scenario | Use |
@@ -218,6 +259,7 @@ Immediately remove files (don't wait for 48h expiration).
 | Analyzing sensitive documents | **Document API** — 48h auto-delete |
 | Multi-source research over time | **NotebookLM** — organized notebooks |
 | CI/CD pipeline document processing | **Document API** — API-native |
+| **Large PDFs (1000+ pages)** | **Document API** — auto-chunking |
 
 ---
 

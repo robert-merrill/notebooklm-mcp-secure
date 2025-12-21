@@ -2525,6 +2525,68 @@ export class ToolHandlers {
     }
   }
 
+  /**
+   * Query a chunked document (v1.10.0)
+   * Queries multiple chunks and aggregates results
+   */
+  async handleQueryChunkedDocument(args: {
+    file_names: string[];
+    query: string;
+    model?: string;
+  }): Promise<ToolResult<{
+    answer: string;
+    model: string;
+    tokensUsed?: number;
+    chunksQueried: number;
+    filesUsed: string[];
+  }>> {
+    log.info(`🔧 [TOOL] query_chunked_document called`);
+    log.info(`  Chunks: ${args.file_names.length}`);
+    log.info(`  Query: ${args.query.substring(0, 50)}...`);
+
+    // Check if Gemini is available
+    if (!this.geminiClient.isAvailable()) {
+      log.error(`❌ [TOOL] query_chunked_document failed: Gemini API key not configured`);
+      return {
+        success: false,
+        error: "Gemini API key not configured. Set GEMINI_API_KEY environment variable.",
+      };
+    }
+
+    try {
+      // Validate inputs
+      if (!args.file_names || args.file_names.length === 0) {
+        throw new Error("At least one file name is required");
+      }
+      if (!args.query || args.query.trim().length === 0) {
+        throw new Error("Query cannot be empty");
+      }
+
+      const result = await this.geminiClient.queryChunkedDocument(
+        args.file_names,
+        args.query,
+        { model: args.model }
+      );
+
+      log.success(`✅ [TOOL] query_chunked_document completed`);
+
+      return {
+        success: true,
+        data: {
+          answer: result.answer,
+          model: result.model,
+          tokensUsed: result.tokensUsed,
+          chunksQueried: args.file_names.length,
+          filesUsed: result.filesUsed,
+        },
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      log.error(`❌ [TOOL] query_chunked_document failed: ${errorMessage}`);
+      return { success: false, error: errorMessage };
+    }
+  }
+
   // ==================== CLEANUP ====================
 
   /**

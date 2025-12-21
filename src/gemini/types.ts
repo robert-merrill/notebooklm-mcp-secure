@@ -211,10 +211,28 @@ export interface QueryDocumentOptions {
 }
 
 /**
+ * Information about a single uploaded chunk
+ */
+export interface UploadedChunk {
+  /** File name for this chunk */
+  fileName: string;
+  /** Chunk index (0-based) */
+  chunkIndex: number;
+  /** Total number of chunks */
+  totalChunks: number;
+  /** Page range start (1-indexed) */
+  pageStart: number;
+  /** Page range end (1-indexed) */
+  pageEnd: number;
+  /** URI for reference */
+  uri: string;
+}
+
+/**
  * Result from document upload
  */
 export interface UploadDocumentResult {
-  /** File name (use this for queries) */
+  /** File name (use this for queries) - primary file or first chunk */
   fileName: string;
   /** Display name */
   displayName: string;
@@ -222,12 +240,20 @@ export interface UploadDocumentResult {
   uri: string;
   /** MIME type */
   mimeType: string;
-  /** File size */
+  /** File size (original file) */
   sizeBytes?: number;
   /** Expiration time (48h from now) */
   expiresAt: string;
   /** Processing state */
   state: FileState;
+  /** Whether file was chunked */
+  wasChunked?: boolean;
+  /** Total pages in original document */
+  totalPages?: number;
+  /** Chunk details (if file was split) */
+  chunks?: UploadedChunk[];
+  /** All file names for querying (includes all chunks) */
+  allFileNames?: string[];
 }
 
 /**

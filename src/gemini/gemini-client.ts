@@ -22,7 +22,9 @@ import type {
   UploadDocumentResult,
   QueryDocumentResult,
   ListDocumentsResult,
+  UploadedChunk,
 } from "./types.js";
+import { analyzePdf, chunkPdf, cleanupChunks } from "./pdf-chunker.js";
 import fs from "fs";
 import path from "path";
 
@@ -292,6 +294,7 @@ export class GeminiClient {
   /**
    * Upload a document to Gemini Files API
    * Files are retained for 48 hours and can be used in multiple queries
+   * Large PDFs (>50MB or >1000 pages) are automatically chunked
    */
   async uploadDocument(options: UploadDocumentOptions): Promise<UploadDocumentResult> {
     if (!this.client) {
@@ -312,6 +315,22 @@ export class GeminiClient {
     // Auto-detect MIME type if not provided
     const detectedMimeType = mimeType || this.detectMimeType(filePath);
 
+    // Check if this is a PDF that might need chunking
+    const isPdf = detectedMimeType === "application/pdf" ||
+                  filePath.toLowerCase().endsWith(".pdf");
+
+    if (isPdf) {
+      const analysis = await analyzePdf(filePath);
+
+      if (analysis.needsChunking) {
+        log.info(`Large PDF detected: ${analysis.reason}`);
+        log.info(`Splitting into ~${analysis.estimatedChunks} chunks...`);
+
+        return await this.uploadChunkedPdf(filePath, fileName, analysis.pageCount);
+      }
+    }
+
+    // Standard upload for non-PDF or small PDF files
     log.info(`Uploading document: ${fileName} (${this.formatBytes(stats.size)})`);
 
     try {
@@ -337,10 +356,89 @@ export class GeminiClient {
         sizeBytes: file.sizeBytes,
         expiresAt: file.expirationTime || this.calculateExpiration(),
         state: file.state as FileState,
+        wasChunked: false,
       };
     } catch (error) {
       const msg = error instanceof Error ? error.message : String(error);
       log.error(`Failed to upload document: ${msg}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Upload a large PDF by splitting it into chunks
+   */
+  private async uploadChunkedPdf(
+    filePath: string,
+    displayName: string,
+    _totalPages: number
+  ): Promise<UploadDocumentResult> {
+    // Chunk the PDF
+    const chunkResult = await chunkPdf(filePath);
+
+    if (!chunkResult.success) {
+      throw new Error(`Failed to chunk PDF: ${chunkResult.error}`);
+    }
+
+    log.info(`Uploading ${chunkResult.chunks.length} chunks...`);
+
+    const uploadedChunks: UploadedChunk[] = [];
+    const allFileNames: string[] = [];
+
+    try {
+      // Upload each chunk
+      for (const chunk of chunkResult.chunks) {
+        log.info(`  Uploading chunk ${chunk.chunkIndex + 1}/${chunk.totalChunks} (pages ${chunk.pageStart}-${chunk.pageEnd})...`);
+
+        const uploadResult = await (this.client!.files as any).upload({
+          file: chunk.filePath,
+          config: {
+            displayName: `${displayName} (Part ${chunk.chunkIndex + 1}/${chunk.totalChunks})`,
+            mimeType: "application/pdf",
+          },
+        });
+
+        // Wait for processing
+        const file = await this.waitForFileProcessing(uploadResult.name);
+
+        uploadedChunks.push({
+          fileName: file.name,
+          chunkIndex: chunk.chunkIndex,
+          totalChunks: chunk.totalChunks,
+          pageStart: chunk.pageStart,
+          pageEnd: chunk.pageEnd,
+          uri: file.uri,
+        });
+
+        allFileNames.push(file.name);
+
+        log.success(`  Chunk ${chunk.chunkIndex + 1} uploaded: ${file.name}`);
+      }
+
+      // Clean up temp chunk files
+      await cleanupChunks(chunkResult.chunks);
+
+      // Return result with first chunk as primary
+      const firstChunk = uploadedChunks[0];
+
+      log.success(`All ${uploadedChunks.length} chunks uploaded successfully`);
+
+      return {
+        fileName: firstChunk.fileName,
+        displayName: displayName,
+        uri: firstChunk.uri,
+        mimeType: "application/pdf",
+        sizeBytes: fs.statSync(filePath).size,
+        expiresAt: this.calculateExpiration(),
+        state: "ACTIVE",
+        wasChunked: true,
+        totalPages: chunkResult.totalPages,
+        chunks: uploadedChunks,
+        allFileNames: allFileNames,
+      };
+    } catch (error) {
+      // Clean up temp files on error
+      await cleanupChunks(chunkResult.chunks);
       throw error;
     }
   }
@@ -512,6 +610,92 @@ export class GeminiClient {
       log.error(`Document query failed: ${msg}`);
       throw error;
     }
+  }
+
+  /**
+   * Query multiple document chunks and aggregate results
+   * This is useful for querying large documents that were split into chunks
+   */
+  async queryChunkedDocument(
+    fileNames: string[],
+    query: string,
+    options?: {
+      model?: string;
+      aggregatePrompt?: string;
+    }
+  ): Promise<QueryDocumentResult> {
+    if (!this.client) {
+      throw new Error("Gemini API key not configured.");
+    }
+
+    if (fileNames.length === 0) {
+      throw new Error("No file names provided");
+    }
+
+    // Single file - just query normally
+    if (fileNames.length === 1) {
+      return this.queryDocument({
+        fileName: fileNames[0],
+        query,
+        model: options?.model as any,
+      });
+    }
+
+    const modelId = options?.model || CONFIG.geminiDefaultModel || "gemini-2.5-flash";
+    log.info(`Querying ${fileNames.length} document chunks...`);
+
+    // Query each chunk
+    const chunkResults: { chunkIndex: number; answer: string }[] = [];
+    let totalTokens = 0;
+
+    for (let i = 0; i < fileNames.length; i++) {
+      log.info(`  Querying chunk ${i + 1}/${fileNames.length}...`);
+
+      const result = await this.queryDocument({
+        fileName: fileNames[i],
+        query,
+        model: options?.model as any,
+      });
+
+      chunkResults.push({
+        chunkIndex: i,
+        answer: result.answer,
+      });
+
+      totalTokens += result.tokensUsed || 0;
+    }
+
+    // Aggregate results using Gemini
+    const aggregatePrompt = options?.aggregatePrompt ||
+      `You received the following answers from different parts of a large document.
+Please synthesize these into a single, coherent response that addresses the original query.
+Remove any redundancy and present the information in a clear, organized manner.
+
+Original query: ${query}
+
+Answers from document parts:
+${chunkResults.map((r, i) => `--- Part ${i + 1} ---\n${r.answer}`).join("\n\n")}
+
+Synthesized answer:`;
+
+    log.info(`  Aggregating ${chunkResults.length} chunk results...`);
+
+    const aggregateResult = await this.query({
+      query: aggregatePrompt,
+      model: modelId as any,
+    });
+
+    const answer = aggregateResult.outputs.find(o => o.type === "text")?.text || "";
+    totalTokens += aggregateResult.usage?.totalTokens || 0;
+
+    log.success(`Chunked document query completed`);
+
+    return {
+      answer,
+      model: modelId,
+      tokensUsed: totalTokens,
+      filesUsed: fileNames,
+    };
   }
 
   /**

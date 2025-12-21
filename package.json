@@ -1,6 +1,6 @@
 {
   "name": "@pan-sec/notebooklm-mcp",
-  "version": "1.9.0",
+  "version": "1.10.0",
   "description": "Security-hardened MCP server for NotebookLM API with enterprise compliance (GDPR, SOC2, CSSF)",
   "type": "module",
   "bin": {
@@ -60,6 +60,7 @@
     "env-paths": "^3.0.0",
     "globby": "^14.1.0",
     "patchright": "^1.48.2",
+    "pdf-lib": "^1.17.1",
     "zod": "^3.22.0"
   },
   "devDependencies": {
