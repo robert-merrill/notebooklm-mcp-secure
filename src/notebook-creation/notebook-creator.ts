@@ -481,7 +481,8 @@ export class NotebookCreator {
   /**
    * Add a file source
    * December 2025: NotebookLM creates a hidden input[type="file"] AFTER clicking
-   * the "choose file" button. The key is: click first, then find the input.
+   * the "choose file" button. CRITICAL: Must use Playwright's real click (not JS click)
+   * because Angular blocks programmatic JavaScript clicks on the upload trigger.
    */
   private async addFileSource(filePath: string): Promise<void> {
     if (!this.page) throw new Error("Page not initialized");
@@ -496,76 +497,85 @@ export class NotebookCreator {
 
     await randomDelay(500, 1000);
 
-    // Method 1 (PRIMARY): Click "choose file" to create the hidden file input, then use it
-    // NotebookLM dynamically creates input[type="file"] only after clicking the button
-    log.info("  Clicking 'choose file' to create file input...");
+    // Method 1 (PRIMARY): Use Playwright's real click on "choose file" button
+    // CRITICAL: Angular blocks JavaScript element.click() - must use Playwright's click()
+    log.info("  Using Playwright click on 'choose file' button...");
     try {
-      // Click the "choose file" button to trigger file input creation
-      const clicked = await this.page.evaluate(() => {
-        // Try the "choose file" span first (most specific)
-        // @ts-expect-error - DOM types
-        const chooseFile = document.querySelector('span.dropzone__file-dialog-button');
-        if (chooseFile && (chooseFile as any).offsetParent !== null) {
-          (chooseFile as any).click();
-          return "chooseFile";
-        }
+      // Try clicking the "choose file" span using Playwright's real click
+      const chooseFileLocator = this.page.locator('span.dropzone__file-dialog-button');
+      if (await chooseFileLocator.count() > 0 && await chooseFileLocator.first().isVisible()) {
+        await chooseFileLocator.first().click();
+        log.info("  Clicked 'choose file' span with Playwright");
 
-        // Try the upload icon button with xapscotty attribute
-        // @ts-expect-error - DOM types
-        const xapscottyBtn = document.querySelector('[xapscottyuploadertrigger]');
-        if (xapscottyBtn && (xapscottyBtn as any).offsetParent !== null) {
-          (xapscottyBtn as any).click();
-          return "xapscotty";
-        }
-
-        // Try the upload icon button
-        // @ts-expect-error - DOM types
-        const uploadBtn = document.querySelector('button[aria-label="Upload sources from your computer"]');
-        if (uploadBtn && (uploadBtn as any).offsetParent !== null) {
-          (uploadBtn as any).click();
-          return "uploadBtn";
-        }
-
-        return null;
-      });
-
-      if (clicked) {
-        log.info(`  Clicked ${clicked}, waiting for file input to be created...`);
-
-        // Wait for the file input to appear (it's created dynamically after click)
-        await this.page.waitForSelector('input[type="file"]', { timeout: 5000 });
+        // Wait for the file input to appear (it's created dynamically after real click)
+        // Note: The input has display:none, so use state:'attached' not 'visible'
+        await this.page.waitForSelector('input[type="file"]', { timeout: 5000, state: 'attached' });
         await randomDelay(200, 400);
 
         // Now set the file on the newly created input
         const fileInputLocator = this.page.locator('input[type="file"]');
         await fileInputLocator.first().setInputFiles(absolutePath);
-        log.success("  ✅ File uploaded via click-then-setInputFiles");
+        log.success("  ✅ File uploaded via Playwright click + setInputFiles");
         await randomDelay(1000, 2000);
-        await this.waitForSourceProcessing();
+        // Use lenient processing check for file uploads (avoids false positive error detection)
+        await this.waitForSourceProcessingLenient();
+        return;
+      }
+
+      // Try the xapscotty trigger button
+      const xapscottyLocator = this.page.locator('[xapscottyuploadertrigger]');
+      if (await xapscottyLocator.count() > 0 && await xapscottyLocator.first().isVisible()) {
+        await xapscottyLocator.first().click();
+        log.info("  Clicked xapscotty trigger with Playwright");
+
+        await this.page.waitForSelector('input[type="file"]', { timeout: 5000, state: 'attached' });
+        await randomDelay(200, 400);
+
+        const fileInputLocator = this.page.locator('input[type="file"]');
+        await fileInputLocator.first().setInputFiles(absolutePath);
+        log.success("  ✅ File uploaded via xapscotty click + setInputFiles");
+        await randomDelay(1000, 2000);
+        await this.waitForSourceProcessingLenient();
+        return;
+      }
+
+      // Try the upload icon button
+      const uploadBtnLocator = this.page.locator('button[aria-label="Upload sources from your computer"]');
+      if (await uploadBtnLocator.count() > 0 && await uploadBtnLocator.first().isVisible()) {
+        await uploadBtnLocator.first().click();
+        log.info("  Clicked upload button with Playwright");
+
+        await this.page.waitForSelector('input[type="file"]', { timeout: 5000, state: 'attached' });
+        await randomDelay(200, 400);
+
+        const fileInputLocator = this.page.locator('input[type="file"]');
+        await fileInputLocator.first().setInputFiles(absolutePath);
+        log.success("  ✅ File uploaded via upload button click + setInputFiles");
+        await randomDelay(1000, 2000);
+        await this.waitForSourceProcessingLenient();
         return;
       }
     } catch (e) {
-      log.info(`  Click-then-setInputFiles approach: ${e}`);
+      log.info(`  Playwright click approach: ${e}`);
     }
 
-    // Method 2: Try filechooser event (fallback)
+    // Method 2: Try filechooser event with Playwright click
     log.info("  Trying filechooser event approach...");
     try {
       // Set up file chooser listener BEFORE clicking
       const fileChooserPromise = this.page.waitForEvent('filechooser', { timeout: 5000 });
 
-      // Click again to trigger filechooser
-      await this.page.evaluate(() => {
-        // @ts-expect-error - DOM types
-        const chooseFile = document.querySelector('span.dropzone__file-dialog-button');
-        if (chooseFile) (chooseFile as any).click();
-      });
+      // Click using Playwright's real click
+      const chooseFileLocator = this.page.locator('span.dropzone__file-dialog-button');
+      if (await chooseFileLocator.count() > 0) {
+        await chooseFileLocator.first().click();
+      }
 
       const fileChooser = await fileChooserPromise;
       await fileChooser.setFiles(absolutePath);
       log.success("  ✅ File uploaded via filechooser event");
       await randomDelay(1000, 2000);
-      await this.waitForSourceProcessing();
+      await this.waitForSourceProcessingLenient();
       return;
     } catch (e) {
       log.info(`  Filechooser approach: ${e}`);
@@ -579,7 +589,7 @@ export class NotebookCreator {
         await fileInputLocator.first().setInputFiles(absolutePath);
         log.success("  ✅ File uploaded via existing locator");
         await randomDelay(1000, 2000);
-        await this.waitForSourceProcessing();
+        await this.waitForSourceProcessingLenient();
         return;
       }
     } catch (e) {
