@@ -15,6 +15,7 @@ import { sessionManagementTools } from "./definitions/session-management.js";
 import { systemTools } from "./definitions/system.js";
 import { geminiTools } from "./definitions/gemini.js";
 import { queryHistoryTools } from "./definitions/query-history.js";
+import { chatHistoryTools } from "./definitions/chat-history.js";
 
 /**
  * Build Tool Definitions with NotebookLibrary context
@@ -33,5 +34,6 @@ export function buildToolDefinitions(library: NotebookLibrary): Tool[] {
     ...systemTools,
     ...geminiTools,
     ...queryHistoryTools,
+    ...chatHistoryTools,
   ];
 }

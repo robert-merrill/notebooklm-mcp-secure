@@ -505,6 +505,18 @@ class NotebookLMMCPServer {
             );
             break;
 
+          // Chat history tool (browser automation)
+          case "get_notebook_chat_history":
+            result = await this.toolHandlers.handleGetNotebookChatHistory(
+              args as {
+                notebook_id?: string;
+                notebook_url?: string;
+                limit?: number;
+                show_browser?: boolean;
+              }
+            );
+            break;
+
           default:
             log.error(`❌ [MCP] Unknown tool: ${name}`);
             return {

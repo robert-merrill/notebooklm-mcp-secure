@@ -355,6 +355,56 @@ Sync notebook sources from a local directory:
 
 ---
 
+## 📊 Query History & Chat Extraction (v1.10.8+)
+
+**Track your research and recover conversations from NotebookLM notebooks.**
+
+### `get_query_history` — Review Past Research (v1.10.8)
+
+All queries made through the MCP are automatically logged for review:
+
+```
+"Show me my recent NotebookLM queries"
+"Find queries about security from last week"
+"What did I ask the fine-tuning notebook?"
+```
+
+- **Automatic logging** — every Q&A pair saved with metadata
+- **Search** — find specific topics across all queries
+- **Filter** — by notebook, session, or date
+- **Quota tracking** — see query counts and timing
+
+### `get_notebook_chat_history` — Extract Browser Conversations (v1.10.9)
+
+Extract conversation history directly from a NotebookLM notebook's chat UI:
+
+```json
+{ "notebook_id": "my-research" }
+// or
+{ "notebook_url": "https://notebooklm.google.com/notebook/xxx" }
+```
+
+**Returns:**
+```json
+{
+  "notebook_url": "https://notebooklm.google.com/notebook/xxx",
+  "notebook_name": "My Research",
+  "message_count": 12,
+  "messages": [
+    { "role": "user", "content": "What is...", "index": 0 },
+    { "role": "assistant", "content": "Based on sources...", "index": 1 }
+  ]
+}
+```
+
+**Use cases:**
+- **Recover conversations** made directly in the NotebookLM browser (not tracked by MCP)
+- **Audit research** — see what queries were made in a notebook
+- **Resume context** — pick up where a previous session left off
+- **Quota reconciliation** — understand why quota seems off
+
+---
+
 ## Why This Fork?
 
 The original NotebookLM MCP is excellent for productivity — but MCP servers handle sensitive data:

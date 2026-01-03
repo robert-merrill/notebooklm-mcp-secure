@@ -2764,6 +2764,157 @@ export class ToolHandlers {
     }
   }
 
+  // ==================== CHAT HISTORY ====================
+
+  /**
+   * Handle get_notebook_chat_history tool
+   *
+   * Extracts conversation history from a NotebookLM notebook's chat UI
+   * using browser automation.
+   */
+  async handleGetNotebookChatHistory(args: {
+    notebook_id?: string;
+    notebook_url?: string;
+    limit?: number;
+    show_browser?: boolean;
+  }): Promise<ToolResult<{
+    notebook_url: string;
+    notebook_name?: string;
+    message_count: number;
+    messages: Array<{
+      role: "user" | "assistant";
+      content: string;
+      index: number;
+    }>;
+  }>> {
+    log.info(`🔧 [TOOL] get_notebook_chat_history called`);
+
+    try {
+      // Resolve notebook URL
+      let notebookUrl: string;
+      let notebookName: string | undefined;
+
+      if (args.notebook_url) {
+        notebookUrl = validateNotebookUrl(args.notebook_url);
+      } else if (args.notebook_id) {
+        validateNotebookId(args.notebook_id);
+        const notebook = this.library.getNotebook(args.notebook_id);
+        if (!notebook) {
+          return {
+            success: false,
+            error: `Notebook not found: ${args.notebook_id}. Use list_notebooks to see available notebooks.`,
+          };
+        }
+        notebookUrl = notebook.url;
+        notebookName = notebook.name;
+      } else {
+        // Try to use active notebook
+        const activeNotebook = this.library.getActiveNotebook();
+        if (!activeNotebook) {
+          return {
+            success: false,
+            error: "No notebook specified. Provide notebook_id or notebook_url, or set an active notebook.",
+          };
+        }
+        notebookUrl = activeNotebook.url;
+        notebookName = activeNotebook.name;
+      }
+
+      log.info(`  📓 Extracting chat history from: ${notebookUrl}`);
+
+      // Apply browser options if show_browser is set
+      if (args.show_browser !== undefined) {
+        applyBrowserOptions({ show: args.show_browser });
+      }
+
+      // Create a temporary session to navigate to the notebook
+      const sessionId = `chat-history-${Date.now()}`;
+      const session = await this.sessionManager.getOrCreateSession(sessionId, notebookUrl);
+
+      try {
+        // Get the page from the session
+        const page = session.getPage();
+        if (!page) {
+          throw new Error("Failed to get page from session");
+        }
+
+        // Wait a bit for the chat history to fully load
+        await page.waitForTimeout(2000);
+
+        // Extract all chat messages from the DOM
+        type ChatMessage = { role: "user" | "assistant"; content: string; index: number };
+        const messages = await page.evaluate((): Array<{ role: string; content: string; index: number }> => {
+          const result: Array<{ role: string; content: string; index: number }> = [];
+
+          // Get all message containers (both user and assistant)
+          // User messages: .from-user-container  /  Assistant messages: .to-user-container
+          // @ts-expect-error - DOM types available in browser context
+          const allContainers = document.querySelectorAll(".from-user-container, .to-user-container");
+
+          let idx = 0;
+          allContainers.forEach((container: any) => {
+            const isUser = container.classList?.contains("from-user-container");
+            const isAssistant = container.classList?.contains("to-user-container");
+
+            if (isUser) {
+              // User message - look for query text
+              const queryText = container.querySelector(".query-text, .message-text-content, .user-message");
+              if (queryText) {
+                const content = queryText.innerText?.trim();
+                if (content) {
+                  result.push({ role: "user", content, index: idx++ });
+                }
+              } else {
+                // Fallback: get container text directly
+                const content = container.innerText?.trim();
+                if (content) {
+                  result.push({ role: "user", content, index: idx++ });
+                }
+              }
+            } else if (isAssistant) {
+              // Assistant message
+              const textContent = container.querySelector(".message-text-content");
+              if (textContent) {
+                const content = textContent.innerText?.trim();
+                if (content) {
+                  result.push({ role: "assistant", content, index: idx++ });
+                }
+              }
+            }
+          });
+
+          return result;
+        }) as ChatMessage[];
+
+        // Apply limit
+        const limit = Math.min(args.limit ?? 50, 200);
+        const limitedMessages = messages.slice(-limit * 2); // Get last N pairs (user + assistant = 2 per pair)
+
+        log.success(`✅ [TOOL] get_notebook_chat_history completed (${limitedMessages.length} messages)`);
+
+        return {
+          success: true,
+          data: {
+            notebook_url: notebookUrl,
+            notebook_name: notebookName,
+            message_count: limitedMessages.length,
+            messages: limitedMessages,
+          },
+        };
+      } finally {
+        // Close the temporary session
+        await this.sessionManager.closeSession(sessionId);
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      log.error(`❌ [TOOL] get_notebook_chat_history failed: ${errorMessage}`);
+      return {
+        success: false,
+        error: errorMessage,
+      };
+    }
+  }
+
   // ==================== CLEANUP ====================
 
   /**
