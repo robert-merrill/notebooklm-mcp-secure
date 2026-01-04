@@ -302,7 +302,9 @@ class NotebookLMMCPServer {
             break;
 
           case "get_health":
-            result = await this.toolHandlers.handleGetHealth();
+            result = await this.toolHandlers.handleGetHealth(
+              args as { deep_check?: boolean; notebook_id?: string }
+            );
             break;
 
           case "setup_auth":

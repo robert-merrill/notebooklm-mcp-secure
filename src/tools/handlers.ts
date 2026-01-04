@@ -494,7 +494,10 @@ export class ToolHandlers {
   /**
    * Handle get_health tool
    */
-  async handleGetHealth(): Promise<
+  async handleGetHealth(args?: {
+    deep_check?: boolean;
+    notebook_id?: string;
+  }): Promise<
     ToolResult<{
       status: string;
       authenticated: boolean;
@@ -506,10 +509,12 @@ export class ToolHandlers {
       headless: boolean;
       auto_login_enabled: boolean;
       stealth_enabled: boolean;
+      chat_ui_accessible?: boolean;
+      deep_check_notebook?: string;
       troubleshooting_tip?: string;
-    }> 
+    }>
   > {
-    log.info(`🔧 [TOOL] get_health called`);
+    log.info(`🔧 [TOOL] get_health called${args?.deep_check ? ' (deep check)' : ''}`);
 
     try {
       // Check authentication status
@@ -518,6 +523,81 @@ export class ToolHandlers {
 
       // Get session stats
       const stats = this.sessionManager.getStats();
+
+      // Deep check: actually verify the chat UI loads
+      let chatUiAccessible: boolean | undefined;
+      let deepCheckNotebook: string | undefined;
+
+      if (args?.deep_check && authenticated) {
+        log.info(`  🔍 Running deep check - verifying chat UI loads...`);
+
+        try {
+          // Find a notebook to test with
+          let notebookUrl: string | undefined;
+
+          if (args.notebook_id) {
+            const notebook = this.library.getNotebook(args.notebook_id);
+            if (notebook) {
+              notebookUrl = notebook.url;
+              deepCheckNotebook = notebook.name || args.notebook_id;
+            }
+          }
+
+          if (!notebookUrl) {
+            const activeNotebook = this.library.getActiveNotebook();
+            if (activeNotebook) {
+              notebookUrl = activeNotebook.url;
+              deepCheckNotebook = activeNotebook.name || "active notebook";
+            }
+          }
+
+          if (!notebookUrl) {
+            // Try to get any notebook from library
+            const notebooks = this.library.listNotebooks();
+            if (notebooks.length > 0) {
+              notebookUrl = notebooks[0].url;
+              deepCheckNotebook = notebooks[0].name || "first notebook";
+            }
+          }
+
+          if (notebookUrl) {
+            // Create a temporary session to test
+            const sessionId = `health-check-${Date.now()}`;
+            const session = await this.sessionManager.getOrCreateSession(sessionId, notebookUrl);
+
+            try {
+              const page = session.getPage();
+              if (page) {
+                // Wait for page to load
+                await page.waitForTimeout(3000);
+
+                // Check for chat input element
+                const chatInput = await page.$('textarea, [contenteditable="true"], .chat-input, .query-input, input[type="text"]');
+                chatUiAccessible = chatInput !== null;
+
+                if (!chatUiAccessible) {
+                  // Also check for common NotebookLM chat selectors
+                  const altSelectors = await page.$('.chat-container, .query-container, .message-input-container');
+                  chatUiAccessible = altSelectors !== null;
+                }
+
+                log.info(`  📊 Chat UI accessible: ${chatUiAccessible}`);
+              } else {
+                chatUiAccessible = false;
+              }
+            } finally {
+              // Clean up the test session
+              await this.sessionManager.closeSession(sessionId);
+            }
+          } else {
+            log.warning(`  ⚠️ No notebook available for deep check`);
+            deepCheckNotebook = "none available";
+          }
+        } catch (deepCheckError) {
+          log.warning(`  ⚠️ Deep check failed: ${deepCheckError instanceof Error ? deepCheckError.message : String(deepCheckError)}`);
+          chatUiAccessible = false;
+        }
+      }
 
       const result = {
         status: "ok",
@@ -530,11 +610,17 @@ export class ToolHandlers {
         headless: CONFIG.headless,
         auto_login_enabled: CONFIG.autoLoginEnabled,
         stealth_enabled: CONFIG.stealthEnabled,
-        // Add troubleshooting tip if not authenticated
-        ...((!authenticated) && {
-          troubleshooting_tip:
-            "For fresh start with clean browser session: Close all Chrome instances → " +
-            "cleanup_data(confirm=true, preserve_library=true) → setup_auth"
+        // Include deep check results if performed
+        ...(args?.deep_check && {
+          chat_ui_accessible: chatUiAccessible,
+          deep_check_notebook: deepCheckNotebook,
+        }),
+        // Add troubleshooting tip if not authenticated or chat UI not accessible
+        ...(((!authenticated) || (args?.deep_check && chatUiAccessible === false)) && {
+          troubleshooting_tip: chatUiAccessible === false
+            ? "Chat UI not accessible. Session may be stale. Run re_auth to refresh authentication."
+            : "For fresh start with clean browser session: Close all Chrome instances → " +
+              "cleanup_data(confirm=true, preserve_library=true) → setup_auth"
         }),
       };
 

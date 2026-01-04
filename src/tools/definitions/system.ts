@@ -6,11 +6,24 @@ export const systemTools: Tool[] = [
     description:
       "Get server health status including authentication state, active sessions, and configuration. " +
       "Use this to verify the server is ready before starting research workflows.\n\n" +
+      "**Deep Check Mode (v2026.1.1)**\n" +
+      "Set `deep_check: true` to actually verify the NotebookLM chat UI loads. " +
+      "This catches stale sessions where cookies exist but the UI won't load. " +
+      "Returns `chat_ui_accessible: true/false`.\n\n" +
       "If authenticated=false and having persistent issues:\n" +
       "Consider running cleanup_data(preserve_library=true) + setup_auth for fresh start with clean browser session.",
     inputSchema: {
       type: "object",
-      properties: {},
+      properties: {
+        deep_check: {
+          type: "boolean",
+          description: "If true, actually navigates to NotebookLM and verifies the chat UI loads. More reliable but slower (~5s). Use this before important query sessions.",
+        },
+        notebook_id: {
+          type: "string",
+          description: "Notebook to check (for deep_check). Defaults to active notebook or first available.",
+        },
+      },
     },
   },
   {
