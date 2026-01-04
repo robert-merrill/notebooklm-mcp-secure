@@ -18,21 +18,27 @@ from the chat UI. This is useful for:
 - Understanding quota usage from direct NotebookLM browser usage
 - Resuming context from previous sessions
 
-Returns an array of messages with role (user/assistant), content, and position.
+## Context Management
+Use \`preview_only: true\` to get a quick count before extracting full content.
+Use \`output_file\` to export to JSON instead of returning to context.
+Use \`offset\` with \`limit\` for pagination through large histories.
 
-## When to Use
-- When you need to see past conversations in a notebook
-- When the local query log doesn't have entries (queries made directly in browser)
-- To understand the context of a notebook's research session
+## Examples
 
-## Example
+Quick audit (preview only):
 \`\`\`json
-{ "notebook_id": "my-research" }
+{ "notebook_id": "my-research", "preview_only": true }
 \`\`\`
 
-Or with direct URL:
+Export to file (avoids context overflow):
 \`\`\`json
-{ "notebook_url": "https://notebooklm.google.com/notebook/xxx" }
+{ "notebook_id": "my-research", "output_file": "/tmp/chat-history.json" }
+\`\`\`
+
+Paginate through history:
+\`\`\`json
+{ "notebook_id": "my-research", "limit": 20, "offset": 0 }
+{ "notebook_id": "my-research", "limit": 20, "offset": 20 }
 \`\`\``,
   inputSchema: {
     type: "object",
@@ -45,9 +51,21 @@ Or with direct URL:
         type: "string",
         description: "Direct notebook URL (overrides notebook_id). Use for notebooks not in your library.",
       },
+      preview_only: {
+        type: "boolean",
+        description: "If true, only returns message count and summary without content. Use this to audit before extracting full history. (default: false)",
+      },
       limit: {
         type: "number",
-        description: "Maximum number of message pairs to return (default: 50, max: 200). Returns most recent first.",
+        description: "Maximum number of message pairs to return (default: 50, max: 200).",
+      },
+      offset: {
+        type: "number",
+        description: "Number of message pairs to skip from the start. Use with limit for pagination. (default: 0)",
+      },
+      output_file: {
+        type: "string",
+        description: "If provided, exports chat history to this JSON file instead of returning to context. Useful for large histories.",
       },
       show_browser: {
         type: "boolean",

@@ -511,7 +511,10 @@ class NotebookLMMCPServer {
               args as {
                 notebook_id?: string;
                 notebook_url?: string;
+                preview_only?: boolean;
                 limit?: number;
+                offset?: number;
+                output_file?: string;
                 show_browser?: boolean;
               }
             );

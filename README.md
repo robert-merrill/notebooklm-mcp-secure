@@ -355,7 +355,7 @@ Sync notebook sources from a local directory:
 
 ---
 
-## 📊 Query History & Chat Extraction (v1.10.8+)
+## 📊 Query History & Chat Extraction (v2026.1.0)
 
 **Track your research and recover conversations from NotebookLM notebooks.**
 
@@ -374,26 +374,41 @@ All queries made through the MCP are automatically logged for review:
 - **Filter** — by notebook, session, or date
 - **Quota tracking** — see query counts and timing
 
-### `get_notebook_chat_history` — Extract Browser Conversations (v1.10.9)
+### `get_notebook_chat_history` — Extract Browser Conversations (v2026.1.0)
 
-Extract conversation history directly from a NotebookLM notebook's chat UI:
+Extract conversation history directly from a NotebookLM notebook's chat UI with **context management** to avoid overwhelming your AI context window:
 
+**Quick audit (preview mode):**
 ```json
-{ "notebook_id": "my-research" }
-// or
-{ "notebook_url": "https://notebooklm.google.com/notebook/xxx" }
+{ "notebook_id": "my-research", "preview_only": true }
 ```
+Returns message counts without content — test the water before extracting.
+
+**Export to file (avoids context overflow):**
+```json
+{ "notebook_id": "my-research", "output_file": "/tmp/chat-history.json" }
+```
+Dumps full history to disk instead of returning to context.
+
+**Paginate through history:**
+```json
+{ "notebook_id": "my-research", "limit": 20, "offset": 0 }
+{ "notebook_id": "my-research", "limit": 20, "offset": 20 }
+```
+Page through large histories without loading everything at once.
 
 **Returns:**
 ```json
 {
   "notebook_url": "https://notebooklm.google.com/notebook/xxx",
   "notebook_name": "My Research",
-  "message_count": 12,
-  "messages": [
-    { "role": "user", "content": "What is...", "index": 0 },
-    { "role": "assistant", "content": "Based on sources...", "index": 1 }
-  ]
+  "total_messages": 150,
+  "returned_messages": 40,
+  "user_messages": 75,
+  "assistant_messages": 75,
+  "offset": 0,
+  "has_more": true,
+  "messages": [...]
 }
 ```
 

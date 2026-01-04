@@ -2775,19 +2775,28 @@ export class ToolHandlers {
   async handleGetNotebookChatHistory(args: {
     notebook_id?: string;
     notebook_url?: string;
+    preview_only?: boolean;
     limit?: number;
+    offset?: number;
+    output_file?: string;
     show_browser?: boolean;
   }): Promise<ToolResult<{
     notebook_url: string;
     notebook_name?: string;
-    message_count: number;
-    messages: Array<{
+    total_messages: number;
+    returned_messages: number;
+    user_messages: number;
+    assistant_messages: number;
+    offset?: number;
+    has_more?: boolean;
+    output_file?: string;
+    messages?: Array<{
       role: "user" | "assistant";
       content: string;
       index: number;
     }>;
   }>> {
-    log.info(`🔧 [TOOL] get_notebook_chat_history called`);
+    log.info(`🔧 [TOOL] get_notebook_chat_history called${args.preview_only ? ' (preview mode)' : ''}`);
 
     try {
       // Resolve notebook URL
@@ -2886,19 +2895,84 @@ export class ToolHandlers {
           return result;
         }) as ChatMessage[];
 
-        // Apply limit
-        const limit = Math.min(args.limit ?? 50, 200);
-        const limitedMessages = messages.slice(-limit * 2); // Get last N pairs (user + assistant = 2 per pair)
+        // Calculate stats
+        const totalMessages = messages.length;
+        const userMessages = messages.filter(m => m.role === "user").length;
+        const assistantMessages = messages.filter(m => m.role === "assistant").length;
 
-        log.success(`✅ [TOOL] get_notebook_chat_history completed (${limitedMessages.length} messages)`);
+        // Preview mode - just return stats without content
+        if (args.preview_only) {
+          log.success(`✅ [TOOL] get_notebook_chat_history preview completed (${totalMessages} messages found)`);
+          return {
+            success: true,
+            data: {
+              notebook_url: notebookUrl,
+              notebook_name: notebookName,
+              total_messages: totalMessages,
+              returned_messages: 0,
+              user_messages: userMessages,
+              assistant_messages: assistantMessages,
+            },
+          };
+        }
+
+        // Apply pagination (offset and limit)
+        const offset = args.offset ?? 0;
+        const limit = Math.min(args.limit ?? 50, 200);
+        const startIdx = offset * 2; // offset is in pairs, convert to message count
+        const endIdx = startIdx + (limit * 2);
+        const paginatedMessages = messages.slice(startIdx, endIdx);
+        const hasMore = endIdx < totalMessages;
+
+        // Re-index the paginated messages
+        const reindexedMessages = paginatedMessages.map((m, idx) => ({
+          ...m,
+          index: startIdx + idx,
+        }));
+
+        // Export to file if requested
+        if (args.output_file) {
+          const fs = await import("fs/promises");
+          const exportData = {
+            notebook_url: notebookUrl,
+            notebook_name: notebookName,
+            exported_at: new Date().toISOString(),
+            total_messages: totalMessages,
+            user_messages: userMessages,
+            assistant_messages: assistantMessages,
+            messages: reindexedMessages,
+          };
+          await fs.writeFile(args.output_file, JSON.stringify(exportData, null, 2));
+          log.success(`✅ [TOOL] get_notebook_chat_history exported to ${args.output_file}`);
+
+          return {
+            success: true,
+            data: {
+              notebook_url: notebookUrl,
+              notebook_name: notebookName,
+              total_messages: totalMessages,
+              returned_messages: reindexedMessages.length,
+              user_messages: userMessages,
+              assistant_messages: assistantMessages,
+              output_file: args.output_file,
+            },
+          };
+        }
+
+        log.success(`✅ [TOOL] get_notebook_chat_history completed (${reindexedMessages.length}/${totalMessages} messages)`);
 
         return {
           success: true,
           data: {
             notebook_url: notebookUrl,
             notebook_name: notebookName,
-            message_count: limitedMessages.length,
-            messages: limitedMessages,
+            total_messages: totalMessages,
+            returned_messages: reindexedMessages.length,
+            user_messages: userMessages,
+            assistant_messages: assistantMessages,
+            offset: offset,
+            has_more: hasMore,
+            messages: reindexedMessages,
           },
         };
       } finally {
