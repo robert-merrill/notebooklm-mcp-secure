@@ -5,6 +5,44 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026.1.3] - 2026-01-15
+
+### Changed
+- Updated `@modelcontextprotocol/sdk` from 1.0.0 to 1.25.2
+
+## [2026.1.2] - 2026-01-15
+
+### Added - Multi-Session Authentication Coordination
+- **Auth Lock System** - Global `.auth-in-progress` lock prevents race conditions when multiple Claude Code sessions authenticate simultaneously
+- **Wait for Auth** - Isolated profiles now wait for any in-progress authentication before cloning base profile
+- **Automatic State Reuse** - If another session completes auth while waiting, shared state is automatically reused
+
+### Configuration
+New environment variables for multi-session support:
+```bash
+export NOTEBOOK_PROFILE_STRATEGY=isolated  # isolated|single|auto
+export NOTEBOOK_CLONE_PROFILE=true         # Clone auth from base profile
+```
+
+### How It Works
+1. Session A starts auth → acquires lock → clears old auth → opens browser
+2. Session B starts → needs isolated profile → detects lock → waits
+3. Session A completes login → saves state → releases lock
+4. Session B continues → clones now-authenticated profile → works immediately
+
+## [2026.1.1] - 2026-01-14
+
+### Added
+- **Deep Health Check** - `get_health` tool now supports `deep_check: true` parameter to verify NotebookLM chat UI actually loads
+- Catches stale sessions where cookies exist but UI won't load
+
+## [2026.1.0] - 2026-01-13
+
+### Added
+- **Chat History Context Management** - New `get_notebook_chat_history` tool for extracting conversation history from NotebookLM notebooks
+- **CalVer Versioning** - Switched to Calendar Versioning (2026.MINOR.PATCH)
+- Preview mode, pagination, and file export options for chat history
+
 ## [1.6.0] - 2025-12-18
 
 ### Added - Enterprise Compliance Module
