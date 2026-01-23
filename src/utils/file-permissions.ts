@@ -88,6 +88,58 @@ export function setSecureDirectoryPermissions(
 }
 
 /**
+ * Validate path for safe use in shell commands (defense-in-depth)
+ *
+ * @param targetPath - Path to validate
+ * @returns true if path is safe for shell use
+ */
+function isPathSafeForShell(targetPath: string): boolean {
+  if (!targetPath || typeof targetPath !== "string") {
+    return false;
+  }
+
+  // Block shell metacharacters that could enable command injection
+  const dangerousChars = /[;&|`$<>(){}[\]!*?~\n\r]/;
+  if (dangerousChars.test(targetPath)) {
+    return false;
+  }
+
+  // Block path traversal attempts
+  if (targetPath.includes("..")) {
+    return false;
+  }
+
+  // Block UNC paths that could access network resources unexpectedly
+  if (targetPath.startsWith("\\\\")) {
+    return false;
+  }
+
+  // Ensure path is within reasonable length (Windows MAX_PATH is 260)
+  if (targetPath.length > 32767) {
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ * Validate username for safe use in shell commands
+ *
+ * @param username - Username to validate
+ * @returns true if username is safe
+ */
+function isUsernameSafe(username: string): boolean {
+  if (!username || typeof username !== "string") {
+    return false;
+  }
+
+  // Usernames should only contain alphanumeric, underscore, hyphen, dot
+  // and be reasonably short
+  const safeUsername = /^[a-zA-Z0-9_.\-]{1,256}$/;
+  return safeUsername.test(username);
+}
+
+/**
  * Set Windows file/directory permissions using icacls
  *
  * @param targetPath - Path to the file or directory
@@ -98,8 +150,23 @@ function setWindowsFilePermissions(targetPath: string, ownerOnly: boolean): bool
   if (!isWindows) return false;
 
   try {
+    // Defense-in-depth: Validate path before using in shell command
+    if (!isPathSafeForShell(targetPath)) {
+      // Log would be nice but we don't have logger imported here
+      // Silently fail for invalid paths
+      return false;
+    }
+
     const username = process.env.USERNAME || process.env.USER;
-    if (!username) {
+    if (!username || !isUsernameSafe(username)) {
+      return false;
+    }
+
+    // Normalize path to resolve any . or redundant separators
+    const normalizedPath = path.normalize(targetPath);
+
+    // Double-check normalized path is still safe
+    if (!isPathSafeForShell(normalizedPath)) {
       return false;
     }
 
@@ -109,7 +176,7 @@ function setWindowsFilePermissions(targetPath: string, ownerOnly: boolean): bool
       // /grant:r - Replace existing permissions with specified ones
       // (F) - Full control
       execSync(
-        `icacls "${targetPath}" /inheritance:r /grant:r "${username}:(F)" /q`,
+        `icacls "${normalizedPath}" /inheritance:r /grant:r "${username}:(F)" /q`,
         { stdio: "pipe" }
       );
     }
