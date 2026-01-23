@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026.1.4] - 2026-01-23
+
+### Security
+- **Defense-in-Depth Path Validation** - Added input validation for Windows `icacls` command
+  - `isPathSafeForShell()` - Blocks shell metacharacters (`;&|`$` etc.) and path traversal (`..`)
+  - `isUsernameSafe()` - Validates username format before shell use
+  - Path normalization before execution
+  - Addresses Medusa security scan finding (false positive but hardened anyway)
+
+### Notes
+- Medusa scan showed 11 findings, 10 were false positives
+- This release hardens the one legitimate concern even though it wasn't exploitable
+
 ## [2026.1.3] - 2026-01-15
 
 ### Changed
