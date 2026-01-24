@@ -70,12 +70,23 @@
 
 - [ ] Push to GitHub: `git push origin main`
 - [ ] Publish to npm: `npm publish --access public`
+
+## 7. GitHub Release (REQUIRED!)
+
+**Don't skip this step!** GitHub releases are how users discover updates.
+
 - [ ] Create GitHub release with detailed notes:
   ```bash
-  gh release create vX.X.X --title "vX.X.X - Title" --notes "changelog"
+  gh release create vX.X.X --title "vX.X.X - Title" --notes "$(cat <<'EOF'
+  ## What's New
+  - Change 1
+  - Change 2
+  EOF
+  )"
   ```
+- [ ] Verify release: `gh release list --limit 3`
 
-### GitHub Release Notes Template
+### Release Notes Template
 ```markdown
 ## What's New in vX.X.X
 
@@ -98,7 +109,7 @@
 https://github.com/Pantheon-Security/notebooklm-mcp-secure/compare/vPREV...vX.X.X
 ```
 
-## 7. Post-Release Verification & Promotion
+## 8. Post-Release Verification & Promotion
 
 ### Verify Publication
 - [ ] npm: `npm view @pan-sec/notebooklm-mcp version`
