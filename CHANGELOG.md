@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026.1.8] - 2026-01-27
+
+### Changed - Major Dependency Updates
+- **@noble/post-quantum** 0.2.1 → 0.5.4 (FIPS 203/204/205 post-quantum cryptography updates)
+- **dotenv** 16.6.1 → 17.2.3
+- **env-paths** 3.0.0 → 4.0.0
+- **globby** 14.1.0 → 16.1.0
+- **zod** 3.25.76 → 4.3.6
+- **@types/node** 20.19.21 → 20.19.30
+
+### Fixed
+- **@noble/post-quantum import path** - Updated import from `@noble/post-quantum/ml-kem` to `@noble/post-quantum/ml-kem.js` (API change in v0.5.4)
+
 ## [2026.1.7] - 2026-01-27
 
 ### Added - MCP Protocol UX Enhancements
