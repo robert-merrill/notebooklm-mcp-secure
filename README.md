@@ -27,18 +27,29 @@
 >
 > Security-hardened fork of [PleasePrompto/notebooklm-mcp](https://github.com/PleasePrompto/notebooklm-mcp) • Maintained by [Pantheon Security](https://pantheonsecurity.io)
 
+### ⚡ TL;DR — What You Get
+
+- 🔍 **Query your NotebookLM notebooks** — source-grounded, zero-hallucination answers
+- 📚 **Create & manage notebooks programmatically** — no manual clicking
+- 🎙️ **Generate audio overviews** — podcast-style summaries of your docs
+- 🔬 **Gemini Deep Research** — comprehensive multi-source research (optional API)
+- 📄 **Document API** — upload & query PDFs without browser (optional API)
+- 🔐 **14 security layers** — post-quantum encryption, audit logs, secrets scanning
+- ✅ **Enterprise compliance** — GDPR, SOC2, CSSF ready
+- 💡 **No API key required** — core features work with just browser auth
+
 ---
 
 ## 🚀 What's New in 2026
 
-**v2026.1.1** brings powerful new capabilities:
+**Latest: v2026.1.8** — Updated dependencies, post-quantum crypto improvements
 
-| Feature | Description |
-|---------|-------------|
-| 🔍 **Deep Health Check** | Verifies NotebookLM chat UI actually loads — catches stale sessions |
-| 📊 **Chat History Extraction** | Recover conversations from browser, with pagination & file export |
-| 🎯 **Context Management** | Preview mode, offset pagination, output to file — never overflow context |
-| 📅 **CalVer Versioning** | Modern `2026.MINOR.PATCH` format for predictable releases |
+| Version | Highlights |
+|---------|------------|
+| **v2026.1.8** | Major dependency updates (zod 4.x, dotenv 17.x, post-quantum 0.5.4) |
+| **v2026.1.7** | MCP Protocol UX: tool icons, human-friendly titles, behavior annotations |
+| **v2026.1.4** | Defense-in-depth path validation, security hardening |
+| **v2026.1.1** | Deep health checks, chat history extraction, context management |
 
 ```bash
 # Quick install
@@ -57,6 +68,66 @@ claude mcp add notebooklm -- npx @pan-sec/notebooklm-mcp@latest
 | Enterprise compliance | ❌ | ✅ **GDPR/SOC2/CSSF** |
 | Chat history extraction | ❌ | ✅ **NEW** |
 | Deep health verification | ❌ | ✅ **NEW** |
+
+<details>
+<summary><b>📋 Full Feature List (43 Tools)</b></summary>
+
+#### Core NotebookLM (No API Key Required)
+| Tool | Description |
+|------|-------------|
+| `ask_question` | Query notebooks with source-grounded answers |
+| `add_notebook` | Add a notebook to your library |
+| `list_notebooks` | List all notebooks in library |
+| `select_notebook` | Set active notebook |
+| `update_notebook` | Update notebook metadata |
+| `remove_notebook` | Remove from library |
+| `create_notebook` | Programmatically create new notebooks |
+| `batch_create_notebooks` | Create multiple notebooks at once |
+| `sync_library` | Sync library with NotebookLM |
+| `list_sources` | List sources in a notebook |
+| `add_source` | Add source to notebook |
+| `remove_source` | Remove source from notebook |
+| `generate_audio_overview` | Create podcast-style audio |
+| `get_audio_status` | Check audio generation status |
+| `download_audio` | Download generated audio |
+| `list_sessions` | List active sessions |
+| `close_session` | Close a session |
+| `reset_session` | Reset session history |
+| `get_health` | Check server & auth status |
+| `setup_auth` | Initial authentication |
+| `re_auth` | Re-authenticate |
+| `cleanup_data` | Clean up local data |
+| `get_quota` | Check usage quotas |
+| `set_quota_tier` | Set quota tier |
+| `get_query_history` | View past queries |
+| `get_notebook_chat_history` | Extract browser chat history |
+| `get_project_info` | Get project context |
+| `export_library` | Export library backup |
+
+#### Gemini API (Optional - Requires GEMINI_API_KEY)
+| Tool | Description |
+|------|-------------|
+| `deep_research` | Comprehensive research agent |
+| `gemini_query` | Fast grounded queries |
+| `get_research_status` | Check research progress |
+| `upload_document` | Upload docs to Gemini |
+| `query_document` | Query uploaded documents |
+| `query_chunked_document` | Query large documents |
+| `list_documents` | List uploaded documents |
+| `delete_document` | Delete uploaded document |
+
+#### Webhooks & Integrations
+| Tool | Description |
+|------|-------------|
+| `configure_webhook` | Set up webhook notifications |
+| `list_webhooks` | List configured webhooks |
+| `test_webhook` | Test webhook delivery |
+| `remove_webhook` | Remove a webhook |
+
+#### Enterprise Compliance (16 additional tools)
+See [Compliance Documentation](./docs/COMPLIANCE-SPEC.md) for full list.
+
+</details>
 
 ---
 
