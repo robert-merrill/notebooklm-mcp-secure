@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026.1.9] - 2026-01-28
+
+### Changed - Documentation & UX Improvements
+- **TL;DR Feature Summary** - Quick bullet list at top of README for instant understanding
+- **Updated "What's New in 2026"** - Shows all recent releases at a glance
+- **Full Feature List** - Collapsible section listing all 43 tools by category
+- **Gemini API Optional Callout** - Prominent messaging that core features need no API key
+- **Architecture Diagram** - Updated to show "NO API KEY NEEDED" vs "OPTIONAL"
+
+### Security
+- Fixed 1 moderate vulnerability in hono dependency via `npm audit fix`
+
 ## [2026.1.8] - 2026-01-27
 
 ### Changed - Major Dependency Updates
