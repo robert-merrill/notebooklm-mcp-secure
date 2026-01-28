@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026.1.10] - 2026-01-28
+
+### Fixed - Tool Description Clarity for Multi-LLM Compatibility
+- **ask_question** - Removed "Gemini" references that confused LLMs into thinking API key was needed
+  - Now clearly states "Browser-Based • NO API KEY REQUIRED"
+  - Added "PREFER THIS TOOL" guidance for notebook queries
+- **deep_research** - Added prominent warning "⚠️ REQUIRES GEMINI_API_KEY"
+  - Added "When NOT to Use" section directing to ask_question
+- **gemini_query** - Added prominent warning "⚠️ REQUIRES GEMINI_API_KEY"
+  - Added "When NOT to Use" section directing to ask_question
+- **upload_document** - Added note about alternatives that don't need API key
+
+This fix addresses feedback from OpenCode users where the LLM was incorrectly choosing Gemini API tools over browser-based tools.
+
 ## [2026.1.9] - 2026-01-28
 
 ### Changed - Documentation & UX Improvements

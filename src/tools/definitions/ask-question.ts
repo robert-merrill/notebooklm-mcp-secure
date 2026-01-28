@@ -12,20 +12,23 @@ export function buildAskQuestionDescription(library: NotebookLibrary): string {
     const topics = active.topics.join(", ");
     const useCases = active.use_cases.map((uc) => `  - ${uc}`).join("\n");
 
-    return `# Conversational Research Partner (NotebookLM • Gemini 2.5 • Session RAG)
+    return `# NotebookLM Research (Browser-Based • NO API KEY REQUIRED)
 
 **Active Notebook:** ${active.name}
 **Content:** ${active.description}
 **Topics:** ${topics}
 
-> Auth tip: If login is required, use the prompt 'notebooklm.auth-setup' and then verify with the 'get_health' tool. If authentication later fails (e.g., expired cookies), use the prompt 'notebooklm.auth-repair'.
+> **IMPORTANT:** This tool uses browser automation - NO GEMINI_API_KEY needed! Just requires browser authentication via setup_auth.
 
 ## What This Tool Is
-- Full conversational research with Gemini (LLM) grounded on your notebook sources
-- Session-based: each follow-up uses prior context for deeper, more precise answers
-- Source-cited responses designed to minimize hallucinations
+- Query your NotebookLM notebooks via browser automation
+- NO API key required - works with just browser authentication
+- Source-cited responses grounded in YOUR uploaded documents
+- Session-based: each follow-up uses prior context for deeper answers
 
 ## When To Use
+- **PREFER THIS TOOL** for questions about your NotebookLM notebooks
+- Use this instead of gemini_query when you have relevant notebooks
 ${useCases}
 
 ## Rules (Important)
@@ -95,7 +98,9 @@ ${bt}${bt}${bt}
 - Or set notebook_url for ad-hoc notebooks (not in library)
 - If ambiguous which notebook fits, ASK the user which to use`;
   } else {
-    return `# Conversational Research Partner (NotebookLM • Gemini 2.5 • Session RAG)
+    return `# NotebookLM Research (Browser-Based • NO API KEY REQUIRED)
+
+> **IMPORTANT:** This tool uses browser automation - NO GEMINI_API_KEY needed!
 
 ## No Active Notebook
 - Visit https://notebooklm.google to create a notebook and get a share link
@@ -103,7 +108,7 @@ ${bt}${bt}${bt}
 - Use **list_notebooks** to show available sources
 - Use **select_notebook** to set one active
 
-> Auth tip: If login is required, use the prompt 'notebooklm.auth-setup' and then verify with the 'get_health' tool. If authentication later fails (e.g., expired cookies), use the prompt 'notebooklm.auth-repair'.
+> Auth tip: If login is required, use the prompt 'notebooklm.auth-setup' and then verify with the 'get_health' tool.
 
 Tip: Tell the user you can manage NotebookLM library and ask which notebook to use for the current task.`;
   }

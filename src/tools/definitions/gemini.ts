@@ -14,20 +14,25 @@ const deepResearchTool: Tool = {
   name: "deep_research",
   description: `Perform deep research using Gemini's Deep Research agent.
 
+> **⚠️ REQUIRES GEMINI_API_KEY** - Do NOT use this tool unless GEMINI_API_KEY is configured. For notebook queries, use ask_question instead (no API key needed).
+
 This runs in the background and can take 1-5 minutes to complete.
 
 ## When to Use
-- You need comprehensive research on a topic
+- ONLY when GEMINI_API_KEY is configured
+- You need comprehensive research on a topic NOT in your notebooks
 - No specific NotebookLM notebook is relevant
-- You want web-grounded answers with citations
+
+## When NOT to Use
+- **Use ask_question instead** for queries about your NotebookLM notebooks (no API key needed)
+- If GEMINI_API_KEY is not set, this tool will fail
 
 ## Requirements
-- GEMINI_API_KEY environment variable must be set
+- GEMINI_API_KEY environment variable MUST be set
 
 ## Notes
 - Deep Research is a premium feature that may incur costs
-- Results are grounded in web sources with citations
-- For notebook-specific queries, use ask_question instead`,
+- Results are grounded in web sources with citations`,
   inputSchema: {
     type: "object",
     properties: {
@@ -57,19 +62,24 @@ const geminiQueryTool: Tool = {
   name: "gemini_query",
   description: `Quick query to Gemini model with optional grounding tools.
 
-Faster than deep_research for simpler questions. Supports:
+> **⚠️ REQUIRES GEMINI_API_KEY** - Do NOT use this tool unless GEMINI_API_KEY is configured. For notebook queries, use ask_question instead (no API key needed).
+
+Supports:
 - Google Search grounding for current information
 - Code execution for calculations
 - URL analysis for web content
 
 ## Requirements
-- GEMINI_API_KEY environment variable must be set
+- GEMINI_API_KEY environment variable MUST be set
 
-## When to Use
-- Quick factual questions
+## When to Use (ONLY if API key is configured)
+- Quick factual questions NOT in your notebooks
 - Current events (with google_search tool)
 - Code calculations (with code_execution tool)
-- Web page analysis (with url_context tool)`,
+- Web page analysis (with url_context tool)
+
+## When NOT to Use
+- **Use ask_question instead** for queries about your NotebookLM notebooks (no API key needed)`,
   inputSchema: {
     type: "object",
     properties: {
@@ -140,6 +150,8 @@ Use this when you started deep_research with wait_for_completion=false.
 const uploadDocumentTool: Tool = {
   name: "upload_document",
   description: `Upload a document (PDF, text, etc.) to Gemini for querying.
+
+> **⚠️ REQUIRES GEMINI_API_KEY** - For adding documents to NotebookLM notebooks (no API key), use create_notebook or add_source instead.
 
 ## What This Does
 - Uploads a local file to Gemini's Files API
