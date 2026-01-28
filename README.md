@@ -119,7 +119,7 @@ Run deep research in the background and check progress:
 │                                                                              │
 │  ┌────────────────────────────────┐    ┌──────────────────────────────────┐  │
 │  │      BROWSER AUTOMATION        │    │          GEMINI API              │  │
-│  │      (Your Documents)          │    │    (Research & Documents)        │  │
+│  │    ✅ NO API KEY NEEDED        │    │    ⚡ OPTIONAL - needs API key   │  │
 │  ├────────────────────────────────┤    ├──────────────────────────────────┤  │
 │  │                                │    │                                  │  │
 │  │  QUERY                         │    │  RESEARCH                        │  │
@@ -147,10 +147,12 @@ Run deep research in the background and check progress:
 └──────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### Gemini Configuration
+> **💡 Gemini API is completely optional!** All core NotebookLM features (ask_question, notebooks, sessions, audio) work via browser automation with **no API key required**. The Gemini tools below are bonus features for users who want direct API access.
+
+### Gemini Configuration (Optional)
 
 ```bash
-# Required for Gemini features
+# Only required if you want Gemini API features (deep_research, gemini_query, upload_document)
 GEMINI_API_KEY=your-api-key          # Get from https://aistudio.google.com/apikey
 
 # Optional settings
@@ -539,6 +541,24 @@ See [COMPLIANCE-SPEC.md](./docs/COMPLIANCE-SPEC.md) for full documentation.
 ---
 
 ## Installation
+
+### What Works Out of the Box (No API Key)
+
+All core NotebookLM features work immediately with just browser authentication:
+
+| Feature | Tool | Description |
+|---------|------|-------------|
+| 🔍 Query notebooks | `ask_question` | Get source-grounded answers from your documents |
+| 📚 Manage library | `add_notebook`, `list_notebooks`, etc. | Organize your notebook collection |
+| 🎙️ Audio overviews | `generate_audio_overview` | Create podcast-style summaries |
+| 📝 Create notebooks | `create_notebook` | Programmatically create new notebooks |
+| 🔄 Session management | `list_sessions`, `reset_session` | Manage conversation context |
+| 📊 Chat history | `get_notebook_chat_history` | Extract past conversations |
+| ❤️ Health checks | `get_health` | Verify authentication status |
+
+**Optional:** Add `GEMINI_API_KEY` for bonus features like `deep_research`, `gemini_query`, and `upload_document`.
+
+---
 
 ### Claude Code
 ```bash
